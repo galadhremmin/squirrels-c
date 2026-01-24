@@ -1,0 +1,22 @@
+# Build artifacts
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+sdl_example
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Debug files
+*.dSYM/
+vgcore.*
