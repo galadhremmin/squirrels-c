@@ -4,7 +4,7 @@
 *.so
 *.dylib
 *.exe
-sdl_example
+squirrel
 
 # IDE files
 .vscode/

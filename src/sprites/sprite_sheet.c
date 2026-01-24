@@ -76,7 +76,7 @@ void sprite_sheet_animation_add(SpriteSheet* sprite_sheet,
                                 const SpriteAnimation animation,
                                 const uint8_t offset_index) {
     if (animation == 0 || animation >= SPRITE_ANIMATION_COUNT) {
-        DEBUG_LOG("Invalid animation %d since it is not in the range of 0 to %d", animation, SPRITE_ANIMATION_COUNT - 1);
+        DEBUG_LOG("Invalid animation %d since it is not in the range of %d to %d", animation, 1, SPRITE_ANIMATION_COUNT);
         return;
     }
 
