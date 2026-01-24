@@ -1,0 +1,43 @@
+# ClangFormat configuration for readable line lengths
+# Based on: https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+
+# Line length limit (80 is classic, 100 is more modern/practical)
+ColumnLimit: 100
+
+# Indentation
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+
+# Brace wrapping
+BreakBeforeBraces: Attach
+BraceWrapping:
+  AfterClass: false
+  AfterControlStatement: false
+  AfterEnum: false
+  AfterFunction: false
+  AfterNamespace: false
+  AfterStruct: false
+  AfterUnion: false
+  BeforeElse: false
+  BeforeCatch: false
+  BeforeWhile: false
+
+# Pointer alignment
+PointerAlignment: Left
+
+# Continuation indentation
+ContinuationIndentWidth: 4
+
+# Wrap long lines
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+
+# Function declarations
+BinPackArguments: false
+BinPackParameters: false
+
+# Align
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
