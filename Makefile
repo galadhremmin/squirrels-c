@@ -30,14 +30,13 @@ TARGET = squirrel
 # Source directory
 SRCDIR = src
 
-# Source files
-SOURCES = $(SRCDIR)/main.c \
-          $(SRCDIR)/utils/paths.c \
-          $(SRCDIR)/sprites/sprite_sheet.c \
-          $(SRCDIR)/sprites/sprite_render.c
+# Automatically find all .c files recursively
+SOURCES = $(shell find $(SRCDIR) -name "*.c" -type f | sort)
 
-# Object files (build in root with unique names)
-OBJECTS = main.o paths.o sprite_sheet.o sprite_render.o
+# Generate object file names from source files
+# Extract just the filename (not path) for object files in root
+# src/main.c -> main.o, src/sprites/sprite.c -> sprite.o
+OBJECTS = $(foreach src,$(SOURCES),$(notdir $(src:.c=.o)))
 
 # Default target
 all: $(TARGET)
@@ -46,17 +45,13 @@ all: $(TARGET)
 $(TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) -o $(TARGET) $(SDL_LIBS)
 
-# Compile source files
-main.o: $(SRCDIR)/main.c
-	$(CC) $(CFLAGS) $(SDL_CFLAGS) -c $< -o $@
+# Automatic rule: compile any .c file to .o
+# Uses vpath to search for source files in subdirectories
+vpath %.c $(SRCDIR) $(shell find $(SRCDIR) -type d)
 
-paths.o: $(SRCDIR)/utils/paths.c
-	$(CC) $(CFLAGS) $(SDL_CFLAGS) -c $< -o $@
-
-sprite_sheet.o: $(SRCDIR)/sprites/sprite_sheet.c
-	$(CC) $(CFLAGS) $(SDL_CFLAGS) -c $< -o $@
-
-sprite_render.o: $(SRCDIR)/sprites/sprite_render.c
+# Pattern rule: any .o file can be built from corresponding .c
+# Make will search vpath to find the source
+%.o: %.c
 	$(CC) $(CFLAGS) $(SDL_CFLAGS) -c $< -o $@
 
 # Clean build artifacts
@@ -117,11 +112,12 @@ valgrind: $(TARGET)
 
 # Static analysis with cppcheck
 check:
-	cppcheck --enable=all --suppress=missingIncludeSystem $(SRCDIR)/
+	cppcheck --enable=all --inline-suppr --suppress=missingIncludeSystem $(SRCDIR)/
 
 # Format code with clang-format (if installed)
+# Automatically finds all .c and .h files
 format:
-	clang-format -i $(SOURCES) $(SRCDIR)/utils/*.h $(SRCDIR)/utils/*.c $(SRCDIR)/sprites/*.h $(SRCDIR)/sprites/*.c
+	@find $(SRCDIR) -name "*.c" -o -name "*.h" | xargs clang-format -i
 
 # Check line length (warn about lines > 100 chars)
 check-lines:

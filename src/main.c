@@ -1,10 +1,12 @@
-#include "utils/memcleanup.h"
-#include "sprites/sprite_sheet.h"
-#include "sprites/sprite_render.h"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "utils/memcleanup.h"
+#include "utils/timer.h"
+#include "world/render.h"
+#include "world/world.h"
 
 // Cleanup functions for automatic resource management
 static void cleanup_window(SDL_Window** window) {
@@ -39,6 +41,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    // cppcheck-suppress constVariablePointer
+    // Pointer must be non-const: cleanup_renderer sets *renderer = NULL via __attribute__((cleanup))
     SDL_Renderer* renderer AUTO_CLEANUP_FUNC(cleanup_renderer) = SDL_CreateRenderer(window, NULL);
 
     if (renderer == NULL) {
@@ -47,49 +51,44 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    SpriteSheet* fox_idle_sprite_sheet AUTO_CLEANUP_FUNC(sprite_sheet_free) =
-        sprite_sheet_new(renderer, "fox_idle", 32, 32);
-    sprite_sheet_animation_add(fox_idle_sprite_sheet, SPRITE_ANIMATION_IDLE_FRONT, 0);
-    sprite_sheet_animation_add(fox_idle_sprite_sheet, SPRITE_ANIMATION_IDLE_BACK, 1);
-    sprite_sheet_animation_add(fox_idle_sprite_sheet, SPRITE_ANIMATION_IDLE_LEFT, 2);
-    sprite_sheet_animation_add(fox_idle_sprite_sheet, SPRITE_ANIMATION_IDLE_RIGHT, 3);
+    World* world AUTO_CLEANUP_FUNC(world_free) = world_new(renderer);
+
+    world_render_init(world);
+
+    Timer timer = {
+        .current_time = SDL_GetTicksNS(),
+        .delta_time = 0,
+    };
 
     bool quit = false;
     SDL_Event e;
-    uint8_t frame_number = 0;
 
     while (!quit) {
         while (SDL_PollEvent(&e)) {
             switch (e.type) {
-                case SDL_EVENT_QUIT:
+            case SDL_EVENT_QUIT:
+                quit = true;
+                break;
+            case SDL_EVENT_KEY_DOWN:
+                switch (e.key.scancode) {
+                case SDL_SCANCODE_ESCAPE:
                     quit = true;
                     break;
-                case SDL_EVENT_KEY_DOWN:
-                    switch (e.key.scancode) {
-                        case SDL_SCANCODE_ESCAPE:
-                            quit = true;
-                            break;
-                        default:
-                            break;
-                    }
+                default:
                     break;
+                }
+                break;
             }
         }
 
-        // Clear screen with a color (dark blue)
-        SDL_SetRenderDrawColor(renderer, 30, 60, 90, 255);
-        SDL_RenderClear(renderer);
+        uint64_t current_time = SDL_GetTicksNS();
+        uint64_t time_diff = current_time - timer.current_time;
+        timer.delta_time = (float)time_diff / 1000000000.0f;
 
-        // Draw a simple rectangle (white)
-        SDL_FRect dst_rect = {300, 100, 32, 32};
-        sprite_sheet_animation_next_frame(fox_idle_sprite_sheet, &frame_number);
-        sprite_sheet_render(renderer, fox_idle_sprite_sheet, SPRITE_ANIMATION_IDLE_FRONT, frame_number, &dst_rect);
+        world_update(world, &timer);
+        world_render(world, &timer);
 
-        // Update screen
-        SDL_RenderPresent(renderer);
-
-        // Small delay to prevent excessive CPU usage
-        SDL_Delay(250); // ~60 FPS
+        timer.current_time = current_time;
     }
 
     SDL_Quit();

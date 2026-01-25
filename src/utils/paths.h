@@ -8,5 +8,5 @@
 #define SOUNDS_DIR ASSETS_DIR "/sounds"
 #define FONTS_DIR ASSETS_DIR "/fonts"
 
-void path_for_sprite(char* buffer, const size_t buffer_size, const char* sprite_name)
+size_t path_for_sprite(char* buffer, const size_t buffer_size, const char* sprite_name)
     __attribute__((nonnull(1, 3)));
