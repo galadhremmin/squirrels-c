@@ -5,7 +5,6 @@
 #include <limits.h>
 #include <stdlib.h>
 
-#include "../utils/debug.h"
 #include "../utils/paths.h"
 #include "sprite.h"
 #include "sprite_load.h"
@@ -18,7 +17,7 @@ Sprite* sprite_new(const SDL_Renderer* renderer,
                    const size_t frame_width,
                    const size_t frame_height) {
     if (frame_width == 0 || frame_height == 0) {
-        DEBUG_LOG("Invalid frame width or height (frame_width: %zu, frame_height: %zu)",
+        SDL_Log("Invalid frame width or height (frame_width: %zu, frame_height: %zu)",
                   frame_width,
                   frame_height);
         return NULL;
@@ -26,7 +25,7 @@ Sprite* sprite_new(const SDL_Renderer* renderer,
 
     SDL_Texture* texture = sprite_texture_load(renderer, sprite_sheet_name);
     if (texture == NULL) {
-        DEBUG_LOG("Failed to load sprite sheet '%s': %s", sprite_sheet_name, SDL_GetError());
+        SDL_Log("Failed to load sprite sheet '%s': %s", sprite_sheet_name, SDL_GetError());
         return NULL;
     }
 
@@ -34,19 +33,19 @@ Sprite* sprite_new(const SDL_Renderer* renderer,
     SDL_GetTextureSize(texture, &texture_w, &texture_h);
 
     if (texture_w <= 0.0f || texture_h <= 0.0f) {
-        DEBUG_LOG("%s", "Invalid texture dimensions");
+        SDL_Log("%s", "Invalid texture dimensions");
         goto error;
     }
 
     if ((int)texture_w % (int)frame_width > 0 || (int)texture_h % (int)frame_height > 0) {
-        DEBUG_LOG("%s", "Texture width or height is not a multiple of frame_width or frame_height");
+        SDL_Log("%s", "Texture width or height is not a multiple of frame_width or frame_height");
         goto error;
     }
 
     size_t frame_count = (size_t)texture_w / frame_width;
 
     if (frame_count == 0 || frame_count > UINT8_MAX) {
-        DEBUG_LOG("%s", "Invalid frame count calculated");
+        SDL_Log("%s", "Invalid frame count calculated");
         goto error;
     }
 
@@ -90,14 +89,14 @@ static SDL_Texture* sprite_texture_load(const SDL_Renderer* renderer,
     char sprite_sheet_path[PATH_MAX + 1] = {0};
     path_for_sprite(sprite_sheet_path, sizeof(sprite_sheet_path), sprite_sheet_name);
 
-    DEBUG_LOG("Loading sprite: %s", sprite_sheet_path);
+    SDL_Log("Loading sprite: %s", sprite_sheet_path);
 
     SDL_Texture* texture = IMG_LoadTexture((SDL_Renderer*)renderer, sprite_sheet_path);
     if (texture == NULL) {
-        DEBUG_LOG("Failed to load sprite sheet '%s': %s", sprite_sheet_path, SDL_GetError());
+        SDL_Log("Failed to load sprite sheet '%s': %s", sprite_sheet_path, SDL_GetError());
         return NULL;
     }
 
-    DEBUG_LOG("[DEBUG] Successfully loaded sprite: %s\n", sprite_sheet_path);
+    SDL_Log("[DEBUG] Successfully loaded sprite: %s\n", sprite_sheet_path);
     return texture;
 }

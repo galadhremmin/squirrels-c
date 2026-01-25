@@ -1,31 +1,31 @@
 #include <SDL3/SDL.h>
 
-#include "../utils/debug.h"
 #include "sprite.h"
 #include "sprite_animate.h"
 
 void sprite_animate_add(Sprite* const sprite,
-                        const SpriteAnimation animation,
+                        const SpriteAnimationFace face,
                         const uint8_t offset_index) {
-    if (animation == 0 || animation >= SPRITE_ANIMATION_COUNT) {
-        DEBUG_LOG("Invalid animation %d since it is not in the range of %d to %d",
-                  animation,
+    if (face == 0 || face >= SPRITE_ANIMATION_FACE_COUNT) {
+        SDL_Log("Invalid animation face %d since it is not in the range of %d to %d",
+                  face,
                   1,
-                  SPRITE_ANIMATION_COUNT - 1);
+                  SPRITE_ANIMATION_FACE_COUNT - 1);
         return;
     }
 
-    sprite->offset_indices_by_animation[animation - 1] = offset_index;
+    sprite->offset_indices_by_animation_face[face - 1] = offset_index;
 }
 
 void sprite_animate_offset_rect(SDL_FRect* const src_rect,
                                 const Sprite* sprite,
-                                const SpriteAnimation animation,
+                                const SpriteAnimationFace face,
                                 const uint8_t frame_number) {
     src_rect->x = (float)(frame_number * sprite->frame_width);
     // animation is 1-indexed, so we subtract 1 to get the offset index
-    uint8_t offset_index = animation - 1;
-    src_rect->y = (float)(sprite->offset_indices_by_animation[offset_index] * sprite->frame_height);
+    uint8_t offset_index = face - 1;
+    src_rect->y =
+        (float)(sprite->offset_indices_by_animation_face[offset_index] * sprite->frame_height);
     src_rect->w = (float)sprite->frame_width;
     src_rect->h = (float)sprite->frame_height;
 }

@@ -23,4 +23,5 @@ typedef struct {
 
 World* world_new(const SDL_Renderer* renderer);
 void world_free(World** world);
+void world_process_input(World* const world, const SDL_Event* event);
 void world_update(World* const world, const Timer* timer);

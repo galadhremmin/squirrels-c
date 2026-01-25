@@ -42,7 +42,8 @@ int main(int argc, char* argv[]) {
     }
 
     // cppcheck-suppress constVariablePointer
-    // Pointer must be non-const: cleanup_renderer sets *renderer = NULL via __attribute__((cleanup))
+    // Pointer must be non-const: cleanup_renderer sets *renderer = NULL via
+    // __attribute__((cleanup))
     SDL_Renderer* renderer AUTO_CLEANUP_FUNC(cleanup_renderer) = SDL_CreateRenderer(window, NULL);
 
     if (renderer == NULL) {
@@ -70,13 +71,13 @@ int main(int argc, char* argv[]) {
                 quit = true;
                 break;
             case SDL_EVENT_KEY_DOWN:
-                switch (e.key.scancode) {
-                case SDL_SCANCODE_ESCAPE:
+                if (e.key.scancode == SDL_SCANCODE_ESCAPE) {
                     quit = true;
                     break;
-                default:
-                    break;
                 }
+                __attribute__((fallthrough));
+            default:
+                world_process_input(world, &e);
                 break;
             }
         }

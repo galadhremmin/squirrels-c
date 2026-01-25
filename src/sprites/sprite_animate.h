@@ -7,7 +7,7 @@
 #include "sprite.h"
 
 typedef struct {
-    SpriteAnimation animation;
+    SpriteAnimationFace face;
     uint64_t last_frame_time;
     float fps;
     uint8_t frame_number;
@@ -15,13 +15,13 @@ typedef struct {
 
 // Add an animation offset to a sprite
 void sprite_animate_add(Sprite* const sprite,
-                        const SpriteAnimation animation,
+                        const SpriteAnimationFace face,
                         const uint8_t offset_index) __attribute__((nonnull(1)));
 
 // Calculate source rectangle for a specific animation frame
 void sprite_animate_offset_rect(SDL_FRect* const src_rect,
                                 const Sprite* sprite,
-                                const SpriteAnimation animation,
+                                const SpriteAnimationFace face,
                                 const uint8_t frame_number) __attribute__((nonnull(1, 2)));
 
 // Advance to next frame in animation

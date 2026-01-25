@@ -54,20 +54,60 @@ void world_update(World* const world, const Timer* timer) {
     (void)timer;
 }
 
+void world_process_input(World* const world, const SDL_Event* event) {
+    switch (event->type) {
+    case SDL_EVENT_KEY_DOWN:
+        switch (event->key.scancode) {
+        case SDL_SCANCODE_LEFT:
+            world->agents[world->player_agent_index]->animation_state.face =
+                SPRITE_ANIMATION_FACE_LEFT;
+            break;
+        case SDL_SCANCODE_RIGHT:
+            world->agents[world->player_agent_index]->animation_state.face =
+                SPRITE_ANIMATION_FACE_RIGHT;
+            break;
+        case SDL_SCANCODE_UP:
+            world->agents[world->player_agent_index]->position_y -= 1;
+            break;
+        case SDL_SCANCODE_DOWN:
+            world->agents[world->player_agent_index]->position_y += 1;
+            break;
+        default:
+            // noop, do nothing
+            break;
+        }
+        break;
+    case SDL_EVENT_KEY_UP:
+        switch (event->key.scancode) {
+        case SDL_SCANCODE_LEFT:
+            world->agents[world->player_agent_index]->animation_state.face =
+                SPRITE_ANIMATION_FACE_FRONT;
+            break;
+        case SDL_SCANCODE_RIGHT:
+            world->agents[world->player_agent_index]->animation_state.face =
+                SPRITE_ANIMATION_FACE_FRONT;
+            break;
+        default:
+            // noop, do nothing
+            break;
+        }
+    }
+}
+
 static void world_sprites_init(World* const world) {
     const SDL_Renderer* renderer = world->renderer;
 
     Sprite* fox_idle_sprite = sprite_new(renderer, "fox_idle", 32, 32);
-    sprite_animate_add(fox_idle_sprite, SPRITE_ANIMATION_IDLE_FRONT, 0);
-    sprite_animate_add(fox_idle_sprite, SPRITE_ANIMATION_IDLE_BACK, 1);
-    sprite_animate_add(fox_idle_sprite, SPRITE_ANIMATION_IDLE_LEFT, 2);
-    sprite_animate_add(fox_idle_sprite, SPRITE_ANIMATION_IDLE_RIGHT, 3);
+    sprite_animate_add(fox_idle_sprite, SPRITE_ANIMATION_FACE_FRONT, 0);
+    sprite_animate_add(fox_idle_sprite, SPRITE_ANIMATION_FACE_BACK, 1);
+    sprite_animate_add(fox_idle_sprite, SPRITE_ANIMATION_FACE_LEFT, 2);
+    sprite_animate_add(fox_idle_sprite, SPRITE_ANIMATION_FACE_RIGHT, 3);
 
     Sprite* fox_run_sprite = sprite_new(renderer, "fox_run", 32, 32);
-    sprite_animate_add(fox_run_sprite, SPRITE_ANIMATION_RUN_FRONT, 0);
-    sprite_animate_add(fox_run_sprite, SPRITE_ANIMATION_RUN_BACK, 1);
-    sprite_animate_add(fox_run_sprite, SPRITE_ANIMATION_RUN_LEFT, 2);
-    sprite_animate_add(fox_run_sprite, SPRITE_ANIMATION_RUN_RIGHT, 3);
+    sprite_animate_add(fox_run_sprite, SPRITE_ANIMATION_FACE_FRONT, 0);
+    sprite_animate_add(fox_run_sprite, SPRITE_ANIMATION_FACE_BACK, 1);
+    sprite_animate_add(fox_run_sprite, SPRITE_ANIMATION_FACE_RIGHT, 2);
+    sprite_animate_add(fox_run_sprite, SPRITE_ANIMATION_FACE_LEFT, 3);
 
     world->sprites[WORLD_SPRITE_TYPE_FOX_IDLE] = fox_idle_sprite;
     world->sprites[WORLD_SPRITE_TYPE_FOX_RUN] = fox_run_sprite;
@@ -93,7 +133,7 @@ static void world_agents_init(World* const world) {
 
     player->sprite = world->sprites[WORLD_SPRITE_TYPE_FOX_IDLE];
     player->animation_state = (AnimationState){
-        .animation = SPRITE_ANIMATION_IDLE_LEFT,
+        .face = SPRITE_ANIMATION_FACE_RIGHT,
         .fps = 4,
         .frame_number = 0,
         .last_frame_time = 0,
