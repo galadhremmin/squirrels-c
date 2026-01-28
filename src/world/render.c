@@ -21,8 +21,9 @@ void world_render(World* const world, const Timer* timer) {
     SDL_RenderClear(renderer);
 
     for (size_t i = 0; i < world->agent_count; i++) {
-        if (world->agents[i] != NULL) {
-            render_agent(renderer, world->agents[i], timer);
+        Agent* const agent = world->agents[i];
+        if (agent != NULL) {
+            render_agent(renderer, agent, timer);
         }
     }
 

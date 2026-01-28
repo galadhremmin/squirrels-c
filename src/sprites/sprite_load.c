@@ -18,8 +18,8 @@ Sprite* sprite_new(const SDL_Renderer* renderer,
                    const size_t frame_height) {
     if (frame_width == 0 || frame_height == 0) {
         SDL_Log("Invalid frame width or height (frame_width: %zu, frame_height: %zu)",
-                  frame_width,
-                  frame_height);
+                frame_width,
+                frame_height);
         return NULL;
     }
 
@@ -64,9 +64,11 @@ Sprite* sprite_new(const SDL_Renderer* renderer,
 error:
     if (texture != NULL) {
         SDL_DestroyTexture(texture);
+        texture = NULL;
     }
     if (sprite != NULL) {
         free(sprite);
+        sprite = NULL;
     }
     return NULL;
 }
@@ -78,6 +80,7 @@ void sprite_free(Sprite** sprite) {
 
     if ((*sprite)->frames_texture != NULL) {
         SDL_DestroyTexture((*sprite)->frames_texture);
+        (*sprite)->frames_texture = NULL;
     }
 
     free(*sprite);

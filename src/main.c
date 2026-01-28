@@ -3,10 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "game.h"
 #include "utils/memcleanup.h"
-#include "utils/timer.h"
-#include "world/render.h"
-#include "world/world.h"
 
 // Cleanup functions for automatic resource management
 static void cleanup_window(SDL_Window** window) {
@@ -52,45 +50,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    World* world AUTO_CLEANUP_FUNC(world_free) = world_new(renderer);
-
-    world_render_init(world);
-
-    Timer timer = {
-        .current_time = SDL_GetTicksNS(),
-        .delta_time = 0,
-    };
-
-    bool quit = false;
-    SDL_Event e;
-
-    while (!quit) {
-        while (SDL_PollEvent(&e)) {
-            switch (e.type) {
-            case SDL_EVENT_QUIT:
-                quit = true;
-                break;
-            case SDL_EVENT_KEY_DOWN:
-                if (e.key.scancode == SDL_SCANCODE_ESCAPE) {
-                    quit = true;
-                    break;
-                }
-                __attribute__((fallthrough));
-            default:
-                world_process_input(world, &e);
-                break;
-            }
-        }
-
-        uint64_t current_time = SDL_GetTicksNS();
-        uint64_t time_diff = current_time - timer.current_time;
-        timer.delta_time = (float)time_diff / 1000000000.0f;
-
-        world_update(world, &timer);
-        world_render(world, &timer);
-
-        timer.current_time = current_time;
-    }
+    game_run(window, renderer);
 
     SDL_Quit();
     return 0;

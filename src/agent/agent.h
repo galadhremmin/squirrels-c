@@ -11,8 +11,12 @@ typedef struct {
     float position_x;
     float position_y;
 
-    AnimationState animation_state;
+    float velocity_x;
+    float velocity_y;
+    float direction;
 
+    AnimationState animation_state;
+    size_t state_machine_id;
 } Agent;
 
 Agent* agent_new(const char* name);
