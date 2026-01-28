@@ -27,36 +27,41 @@ endif
 # Target executable
 TARGET = squirrel
 
+# Output directory for executable and shared libraries
+BINDIR = bin
+
 # Source directory
 SRCDIR = src
 
 # Automatically find all .c files recursively
 SOURCES = $(shell find $(SRCDIR) -name "*.c" -type f | sort)
 
-# Generate object file names from source files
-# Extract just the filename (not path) for object files in root
-# src/main.c -> main.o, src/sprites/sprite.c -> sprite.o
-OBJECTS = $(foreach src,$(SOURCES),$(notdir $(src:.c=.o)))
+# Generate object file names from source files (in BINDIR)
+# src/main.c -> bin/main.o, src/sprites/sprite.c -> bin/sprite.o
+OBJECTS = $(foreach src,$(SOURCES),$(BINDIR)/$(notdir $(src:.c=.o)))
 
 # Default target
-all: $(TARGET)
+all: $(BINDIR)/$(TARGET)
+
+# Ensure output directory exists
+$(BINDIR):
+	mkdir -p $(BINDIR)
 
 # Build target
-$(TARGET): $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) -o $(TARGET) $(SDL_LIBS)
+$(BINDIR)/$(TARGET): $(OBJECTS) | $(BINDIR)
+	$(CC) $(CFLAGS) $(OBJECTS) -o $(BINDIR)/$(TARGET) $(SDL_LIBS)
 
-# Automatic rule: compile any .c file to .o
+# Automatic rule: compile any .c file to .o in BINDIR
 # Uses vpath to search for source files in subdirectories
 vpath %.c $(SRCDIR) $(shell find $(SRCDIR) -type d)
 
-# Pattern rule: any .o file can be built from corresponding .c
-# Make will search vpath to find the source
-%.o: %.c
+# Pattern rule: any .o in BINDIR can be built from corresponding .c
+$(BINDIR)/%.o: %.c | $(BINDIR)
 	$(CC) $(CFLAGS) $(SDL_CFLAGS) -c $< -o $@
 
-# Clean build artifacts
+# Clean build artifacts (object files, executable, and any .so in BINDIR)
 clean:
-	rm -f $(OBJECTS) $(TARGET)
+	rm -f *.o $(OBJECTS) $(BINDIR)/$(TARGET) $(BINDIR)/*.so
 
 # Install dependencies (platform-specific)
 install-deps:
@@ -96,19 +101,19 @@ check-deps: check-pkg-config
 
 # Debug build (with debugging symbols, no optimization)
 debug: CFLAGS = $(DEBUG_CFLAGS)
-debug: $(TARGET)
+debug: $(BINDIR)/$(TARGET)
 
 # Debug build with sanitizers (catches memory errors at runtime)
 sanitize: CFLAGS = $(SANITIZER_CFLAGS)
-sanitize: $(TARGET)
+sanitize: $(BINDIR)/$(TARGET)
 
 # Run the program
-run: $(TARGET)
-	./$(TARGET)
+run: $(BINDIR)/$(TARGET)
+	./$(BINDIR)/$(TARGET)
 
 # Run with valgrind (memory leak checker)
-valgrind: $(TARGET)
-	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(TARGET)
+valgrind: $(BINDIR)/$(TARGET)
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(BINDIR)/$(TARGET)
 
 # Static analysis with cppcheck
 check:

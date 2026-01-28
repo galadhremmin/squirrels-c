@@ -5,6 +5,7 @@
 *.dylib
 *.exe
 squirrel
+bin/
 
 # IDE files
 .vscode/
