@@ -12,7 +12,7 @@
 
 typedef struct {
     bool is_cancellable_on_queue;
-    bool is_cancellable;
+    bool is_terminal_state;
     bool is_transient;
     uint64_t duration_ns;
     AgentStateId state_id_after_expiry;
@@ -41,7 +41,7 @@ static const AgentState states[AGENT_STATE_COUNT] = {
     [AGENT_STATE_IDLE] =
         {
             .is_cancellable_on_queue = true,
-            .is_cancellable = true,
+            .is_terminal_state = true,
             .is_transient = false,
             .duration_ns = 0,
             .state_id_after_expiry = AGENT_STATE_IDLE,
@@ -50,7 +50,7 @@ static const AgentState states[AGENT_STATE_COUNT] = {
     [AGENT_STATE_RUN_LEFT] =
         {
             .is_cancellable_on_queue = true,
-            .is_cancellable = true,
+            .is_terminal_state = true,
             .is_transient = false,
             .duration_ns = 0,
             .state_id_after_expiry = AGENT_STATE_IDLE,
@@ -59,7 +59,7 @@ static const AgentState states[AGENT_STATE_COUNT] = {
     [AGENT_STATE_RUN_RIGHT] =
         {
             .is_cancellable_on_queue = true,
-            .is_cancellable = true,
+            .is_terminal_state = true,
             .is_transient = false,
             .duration_ns = 0,
             .state_id_after_expiry = AGENT_STATE_IDLE,
@@ -68,7 +68,7 @@ static const AgentState states[AGENT_STATE_COUNT] = {
     [AGENT_STATE_JUMP] =
         {
             .is_cancellable_on_queue = true,
-            .is_cancellable = false,
+            .is_terminal_state = false,
             .is_transient = true,
             .duration_ns = AGENT_STATE_TRANSIENT_DURATION_NS,
             .state_id_after_expiry = AGENT_STATE_IDLE,
@@ -77,7 +77,7 @@ static const AgentState states[AGENT_STATE_COUNT] = {
     [AGENT_STATE_DYING] =
         {
             .is_cancellable_on_queue = false,
-            .is_cancellable = false,
+            .is_terminal_state = false,
             .is_transient = true,
             .duration_ns = AGENT_STATE_TRANSIENT_DURATION_NS,
             .state_id_after_expiry = AGENT_STATE_DEAD,
@@ -86,7 +86,7 @@ static const AgentState states[AGENT_STATE_COUNT] = {
     [AGENT_STATE_DEAD] =
         {
             .is_cancellable_on_queue = false,
-            .is_cancellable = false,
+            .is_terminal_state = false,
             .is_transient = false,
             .duration_ns = 0,
             .state_id_after_expiry = AGENT_STATE_DEAD,
@@ -286,11 +286,24 @@ void agent_state_push(Agent* const agent, const AgentStateId next_id) {
         const AgentStateId last_pending_state_id =
             state_machine->next_states[state_machine->next_states_count - 1];
         const AgentState* last_pending_state = &states[last_pending_state_id];
-        if (!last_pending_state->is_cancellable_on_queue) {
-            SDL_Log("Cannot push state %d, next state %d is not cancellable",
+        if (!last_pending_state->is_terminal_state) {
+            SDL_Log("Cannot push state %d, next state %d is a terminal state",
                     next_id,
                     last_pending_state_id);
             return;
+        }
+
+        if (state_machine->next_states_count == MAX_NEXT_STATES - 1) {
+            if (!last_pending_state->is_cancellable_on_queue) {
+                SDL_Log("Cannot push state %d, next state %d is not cancellable on queue and next states count is at max",
+                        next_id,
+                        last_pending_state_id);
+                return;
+            } else {
+                // Since we've hit max number of pending states, we need to remove the last pending state and replace it with the new incoming state. This should be possible since the
+                // last pending state is not a terminal state && cancellable.
+                state_machine->next_states_count = MAX_NEXT_STATES - 1;
+            }
         }
     }
 

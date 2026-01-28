@@ -148,7 +148,7 @@ static bool world_sprites_init(World* const world) {
 }
 
 static bool world_agents_init(World* const world) {
-    const size_t initial_capacity = 10;
+    const size_t initial_capacity = 50;
 
     world->agents = (Agent**)calloc(initial_capacity, sizeof(Agent*));
     if (world->agents == NULL) {
@@ -173,7 +173,7 @@ static bool world_agents_init(World* const world) {
         .last_frame_time = 0,
     };
     player->position_x = 100;
-    player->position_y = 100;
+    player->position_y = 50;
 
     if (!agent_state_new(player)) {
         SDL_Log("Failed to create agent state machine for player");
@@ -183,6 +183,25 @@ static bool world_agents_init(World* const world) {
     world->agents[0] = player;
     world->agent_count = 1;
     world->player_agent_index = 0;
+
+    for (size_t i = 0; i < 20; i++) {
+        Agent* agent = agent_new("npc");
+        if (agent == NULL) {
+            return false;
+        }
+        agent->sprite = world->sprites[WORLD_SPRITE_TYPE_FOX_IDLE];
+        agent->animation_state = (AnimationState){
+            .face = SPRITE_ANIMATION_FACE_RIGHT,
+            .fps = 4,
+            .frame_number = 0,
+            .last_frame_time = 0,
+        };
+        agent->position_x = 100;
+        agent->position_y = 50 + (i + 1) * agent->sprite->frame_width*1.5f;
+        
+        world->agents[world->agent_count] = agent;
+        world->agent_count++;
+    }
 
     return true;
 }
