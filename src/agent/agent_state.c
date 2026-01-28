@@ -1,9 +1,14 @@
 #include "agent_state.h"
+#include <SDL3/SDL.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define INITIAL_AGENT_STATE_MACHINES_CAPACITY 16
 #define MAX_NEXT_STATES 10
 #define NO_STATE_MACHINE_ID SIZE_MAX
+#define AGENT_STATE_TRANSIENT_DURATION_NS 2000000000UL // 2 seconds in nanoseconds
 
 typedef struct {
     bool is_cancellable_on_queue;
@@ -65,7 +70,7 @@ static const AgentState states[AGENT_STATE_COUNT] = {
             .is_cancellable_on_queue = true,
             .is_cancellable = false,
             .is_transient = true,
-            .duration_ns = 2000000000,
+            .duration_ns = AGENT_STATE_TRANSIENT_DURATION_NS,
             .state_id_after_expiry = AGENT_STATE_IDLE,
             .on_enter_state = on_enter_state_jump,
         },
@@ -74,7 +79,7 @@ static const AgentState states[AGENT_STATE_COUNT] = {
             .is_cancellable_on_queue = false,
             .is_cancellable = false,
             .is_transient = true,
-            .duration_ns = 2000000000,
+            .duration_ns = AGENT_STATE_TRANSIENT_DURATION_NS,
             .state_id_after_expiry = AGENT_STATE_DEAD,
             .on_enter_state = on_enter_state_dying,
         },
@@ -95,6 +100,11 @@ static size_t agent_state_machines_pointer = 0;
 static size_t agent_state_machines_capacity = 0;
 
 bool agent_state_new(Agent* const agent) {
+    if (agent == NULL) {
+        SDL_Log("Agent is NULL in agent_state_new");
+        return false;
+    }
+
     if (agent->state_machine_id > 0 && agent->state_machine_id != NO_STATE_MACHINE_ID) {
         SDL_Log(
             "Agent %s already has a state machine (id: %zu)", agent->name, agent->state_machine_id);
@@ -171,16 +181,23 @@ find_next_available_slot:
 }
 
 void agent_state_free(Agent* const agent) {
-    if (agent->state_machine_id == 0) {
+    if (agent == NULL || agent->state_machine_id == 0) {
         return;
     }
 
     const size_t state_machine_index = agent->state_machine_id - 1;
 
-    // If the state machine index is the same as the pointer, we don't need to free anything. This
-    // indicates that the free has been called multiple times.
-    if (state_machine_index == agent_state_machines_pointer) {
+    // Validate that the index is within bounds
+    if (state_machine_index >= agent_state_machines_capacity || agent_state_machines == NULL) {
+        SDL_Log("Invalid state machine index %zu for agent %s", state_machine_index, agent->name);
+        agent->state_machine_id = 0;
+        return;
+    }
+
+    // Check if the state machine has already been freed
+    if (agent_state_machines[state_machine_index] == NULL) {
         SDL_Log("State machine for agent %s has already been freed", agent->name);
+        agent->state_machine_id = 0;
         return;
     }
 
@@ -222,11 +239,17 @@ void agent_state_free(Agent* const agent) {
 }
 
 void agent_state_free_all(void) {
-    for (int i = agent_state_machines_capacity - 1; i >= 0; i--) {
-        AgentStateMachine** state_machine = &agent_state_machines[i];
-        if (*state_machine != NULL) {
-            free(*state_machine);
-            *state_machine = NULL;
+    if (agent_state_machines == NULL) {
+        return;
+    }
+
+    if (agent_state_machines_capacity > 0) {
+        for (size_t i = agent_state_machines_capacity; i > 0; i--) {
+            AgentStateMachine** state_machine = &agent_state_machines[i - 1];
+            if (*state_machine != NULL) {
+                free(*state_machine);
+                *state_machine = NULL;
+            }
         }
     }
     free(agent_state_machines);
@@ -237,6 +260,11 @@ void agent_state_free_all(void) {
 }
 
 void agent_state_push(Agent* const agent, const AgentStateId next_id) {
+    if (agent == NULL) {
+        SDL_Log("Agent is NULL in agent_state_push");
+        return;
+    }
+
     if (next_id < AGENT_STATE_IDLE || next_id >= AGENT_STATE_COUNT) {
         SDL_Log("Invalid state id: %d", next_id);
         return;
@@ -275,6 +303,11 @@ void agent_state_push(Agent* const agent, const AgentStateId next_id) {
 }
 
 int agent_state_update(Agent* const agent, const Timer* timer) {
+    if (timer == NULL) {
+        SDL_Log("Timer is NULL in agent_state_update");
+        return -1;
+    }
+
     const size_t state_machine_id = state_machine_id_get(agent);
     if (state_machine_id == NO_STATE_MACHINE_ID) {
         SDL_Log("Agent %s has no state machine", agent->name);
@@ -282,7 +315,17 @@ int agent_state_update(Agent* const agent, const Timer* timer) {
     }
 
     AgentStateMachine* state_machine = agent_state_machines[state_machine_id];
+    if (state_machine == NULL) {
+        SDL_Log("State machine is NULL for agent %s", agent->name);
+        return -1;
+    }
+
     const AgentStateId current_state_id = state_machine->current_state_id;
+    if (current_state_id >= AGENT_STATE_COUNT) {
+        SDL_Log("Invalid current state id %d for agent %s", current_state_id, agent->name);
+        return -1;
+    }
+
     const AgentState* current_state = &states[current_state_id];
 
     int new_state_id = -1;
@@ -293,11 +336,13 @@ int agent_state_update(Agent* const agent, const Timer* timer) {
         new_state_id = (int)state_machine->next_states[0];
         state_machine->next_states_count -= 1;
 
-        memmove(state_machine->next_states, state_machine->next_states + 1, state_machine->next_states_count * sizeof(AgentStateId));
+        memmove(state_machine->next_states,
+                state_machine->next_states + 1,
+                state_machine->next_states_count * sizeof(AgentStateId));
         state_machine->next_states[state_machine->next_states_count] = 0;
     }
 
-    if (new_state_id != -1) {
+    if (new_state_id != -1 && new_state_id >= 0 && new_state_id < AGENT_STATE_COUNT) {
         state_machine->current_state_id = (AgentStateId)new_state_id;
         state_machine->current_state_start_time_ns = timer->current_time_ns;
         if (states[new_state_id].on_enter_state != NULL) {
@@ -321,14 +366,25 @@ static size_t state_machine_id_get(const Agent* agent) {
 }
 
 static bool state_expired(const AgentStateMachine* state_machine, const Timer* timer) {
-    if (state_machine == NULL || state_machine->current_state_id >= AGENT_STATE_COUNT) {
+    if (state_machine == NULL || timer == NULL) {
         return false;
     }
-    
+
+    // Validate state ID before array access
+    if (state_machine->current_state_id >= AGENT_STATE_COUNT) {
+        return false;
+    }
+
     const AgentState* current_state = &states[state_machine->current_state_id];
 
     if (!current_state->is_transient) {
         return false;
+    }
+
+    // Handle potential timer wraparound: if current_time_ns < start_time_ns, timer has wrapped
+    if (timer->current_time_ns < state_machine->current_state_start_time_ns) {
+        // Timer wrapped around, consider state as expired to prevent infinite states
+        return true;
     }
 
     return (timer->current_time_ns - state_machine->current_state_start_time_ns >=

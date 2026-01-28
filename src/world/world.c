@@ -20,11 +20,11 @@ World* world_new(const SDL_Renderer* renderer) {
 
     world->renderer = renderer;
 
-    if (! world_sprites_init(world)) {
+    if (!world_sprites_init(world)) {
         return NULL;
     }
 
-    if (! world_agents_init(world)) {
+    if (!world_agents_init(world)) {
         return NULL;
     }
 
@@ -65,7 +65,7 @@ void world_update(World* const world, const Timer* timer) {
             Agent* const agent = world->agents[i];
             int new_state_id = agent_state_update(agent, timer);
             if (new_state_id != -1) {
-                switch ((AgentStateId) new_state_id) {
+                switch ((AgentStateId)new_state_id) {
                 case AGENT_STATE_IDLE:
                     agent->sprite = world->sprites[WORLD_SPRITE_TYPE_FOX_IDLE];
                     break;

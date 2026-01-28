@@ -7,6 +7,8 @@
 #include "world/world.h"
 
 int game_run(SDL_Window* window, SDL_Renderer* renderer) {
+    (void)window;
+
     World* world AUTO_CLEANUP_FUNC(world_free) = world_new(renderer);
     if (world == NULL) {
         return 1;
