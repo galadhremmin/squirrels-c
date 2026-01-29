@@ -1,4 +1,4 @@
-#include "paths.h"
+#include "Paths.h"
 #include <stdio.h>
 
 size_t path_for_sprite(char* buffer, const size_t buffer_size, const char* sprite_name) {
