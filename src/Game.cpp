@@ -8,7 +8,7 @@
 
 GameApp::GameApp() : window_{}, renderer_{} {
 
-    SDL_Window* window = SDL_CreateWindow("Squirrels", 640, 480, SDL_WINDOW_OPENGL);
+    SDL_Window* window = SDL_CreateWindow("Squirrels", 1024, 768, SDL_WINDOW_OPENGL);
     if (window == nullptr) {
         throw std::runtime_error("Failed to create window");
     }
@@ -51,7 +51,7 @@ int GameApp::run() {
                 }
                 [[fallthrough]];
             default:
-                world.process_input(e);
+                world.processInput(e);
                 break;
             }
         }

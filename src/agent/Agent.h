@@ -4,7 +4,7 @@
 #include <string>
 
 #include "../sprites/Sprite.h"
-#include "AgentState.h"
+#include "../states/StateMachine.h"
 
 class Agent {
   public:
@@ -20,6 +20,5 @@ class Agent {
     float velocity_x_ = 0.0f;
     float velocity_y_ = 0.0f;
     float direction_ = 0.0f;
-    AnimationState animation_state_{};
-    AgentStateMachine state_machine_{};
+    SpriteAnimationState animation_state_{};
 };

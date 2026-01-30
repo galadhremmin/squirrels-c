@@ -13,12 +13,12 @@ Renderer::Renderer(const std::shared_ptr<SDL_Renderer>& renderer) : renderer_(re
     }
 }
 
-void Renderer::begin_scene() const {
+void Renderer::beginScene() const {
     SDL_SetRenderDrawColor(renderer_.get(), 30, 60, 90, 255);
     SDL_RenderClear(renderer_.get());
 }
 
-void Renderer::end_scene() const {
+void Renderer::endScene() const {
     SDL_RenderPresent(renderer_.get());
 }
 
@@ -30,24 +30,24 @@ void Renderer::render(const Agent& agent, const Timer& timer) {
     SDL_FRect dst_rect = {
         .x = agent.position_x_,
         .y = agent.position_y_,
-        .w = static_cast<float>(agent.sprite_->frame_width()) * 2.0f,
-        .h = static_cast<float>(agent.sprite_->frame_height()) * 2.0f,
+        .w = static_cast<float>(agent.sprite_->getFrameWidth()) * 2.0f,
+        .h = static_cast<float>(agent.sprite_->getFrameHeight()) * 2.0f,
     };
 
-    render_sprite(
+    renderSprite(
         *agent.sprite_, agent.animation_state_.face, agent.animation_state_.frame_number, dst_rect);
 }
 
-void Renderer::render_sprite(const Sprite& sprite,
-                             const SpriteAnimationFace face,
-                             const uint8_t frame_number,
-                             const SDL_FRect& dst_rect) {
+void Renderer::renderSprite(const Sprite& sprite,
+                            const SpriteAnimationFace face,
+                            const uint8_t frame_number,
+                            const SDL_FRect& dst_rect) {
     SDL_FRect src_rect = {
-        .x = static_cast<float>(frame_number * sprite.frame_width()),
-        .y = static_cast<float>(sprite.get_offset_index(face) * sprite.frame_height()),
-        .w = static_cast<float>(sprite.frame_width()),
-        .h = static_cast<float>(sprite.frame_height()),
+        .x = static_cast<float>(frame_number * sprite.getFrameWidth()),
+        .y = static_cast<float>(sprite.getOffsetIndex(face) * sprite.getFrameHeight()),
+        .w = static_cast<float>(sprite.getFrameWidth()),
+        .h = static_cast<float>(sprite.getFrameHeight()),
     };
 
-    SDL_RenderTexture(renderer_.get(), sprite.texture(), &src_rect, &dst_rect);
+    SDL_RenderTexture(renderer_.get(), sprite.getTexturePtr(), &src_rect, &dst_rect);
 }

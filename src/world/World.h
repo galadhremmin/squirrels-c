@@ -27,16 +27,18 @@ class World {
     World(World&&) noexcept = delete;
     World& operator=(World&&) noexcept = delete;
 
-    void process_input(const SDL_Event& event);
+    void processInput(const SDL_Event& event);
     void update(const Timer& timer);
     void render(const Timer& timer);
 
   private:
-    bool init_sprites();
-    bool init_agents();
+    bool initSprites();
+    bool initAgents();
+    bool initStateMachines();
 
     std::unordered_map<WorldSpriteType, Sprite> sprites_;
     std::vector<Agent> agents_;
     Renderer renderer_;
     size_t player_agent_index_;
+    std::unique_ptr<StateMachine> player_agent_state_machine_;
 };
