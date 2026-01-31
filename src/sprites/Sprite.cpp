@@ -7,61 +7,49 @@
 #include "../utils/Timer.h"
 #include "Sprite.h"
 
-static SDL_Texture* sprite_texture_load(SDL_Renderer* renderer, const char* sprite_sheet_name);
-
-Sprite::Sprite(const size_t frame_width, const size_t frame_height)
-    : frames_texture_ptr_(nullptr, SDL_DestroyTexture), frame_count_(0), frame_width_(frame_width),
-      frame_height_(frame_height), loaded_(false) {
+Sprite::Sprite(const squirrel::Texture* frames_texture_ptr,
+               const size_t frame_width,
+               const size_t frame_height)
+    : frames_texture_ptr_(frames_texture_ptr), frame_count_(0), frame_width_(frame_width),
+      frame_height_(frame_height) {
     if (frame_width_ == 0 || frame_height_ == 0) {
         throw std::invalid_argument("Invalid frame width or height");
     }
+    if (frames_texture_ptr_ == nullptr) {
+        throw std::invalid_argument("Frames texture pointer must not be null");
+    }
+    reset(frames_texture_ptr);
 }
 
 Sprite::~Sprite() {
 }
 
-void Sprite::load(SDL_Renderer* const sdl_renderer_ptr, const std::string& sprite_filename) {
-    if (loaded_) {
-        return;
+void Sprite::reset(const squirrel::Texture* frames_texture_ptr) {
+    if (frames_texture_ptr_ == nullptr) {
+        throw std::invalid_argument("Frames texture pointer must not be null");
     }
-
-    auto full_sprite_path = "assets/sprites/" + sprite_filename + ".png";
-
-    SDL_Texture* const texture = IMG_LoadTexture(sdl_renderer_ptr, full_sprite_path.c_str());
-    if (texture == nullptr) {
-        SDL_Log("Failed to load sprite sheet '%s': %s", full_sprite_path.c_str(), SDL_GetError());
-        return;
-    }
-
-    SDL_Log("[DEBUG] Successfully loaded sprite: %s\n", full_sprite_path.c_str());
 
     float texture_w, texture_h;
-    SDL_GetTextureSize(texture, &texture_w, &texture_h);
+    SDL_GetTextureSize(frames_texture_ptr->texture, &texture_w, &texture_h);
 
     if (texture_w <= 0.0f || texture_h <= 0.0f) {
-        SDL_DestroyTexture(texture);
-        SDL_Log("Invalid texture dimensions as they are not positive.");
-        return;
+        throw std::invalid_argument("Invalid texture dimensions as they are not positive.");
     }
 
     if (static_cast<int>(texture_w) % static_cast<int>(frame_width_) > 0 ||
         static_cast<int>(texture_h) % static_cast<int>(frame_height_) > 0) {
-        SDL_DestroyTexture(texture);
-        SDL_Log("Invalid texture dimensions as they are not multiples of frame size.");
-        return;
+        throw std::invalid_argument(
+            "Invalid texture dimensions as they are not multiples of frame size.");
     }
 
     size_t frame_count = static_cast<size_t>(texture_w) / frame_width_;
 
     if (frame_count == 0 || frame_count > UINT8_MAX) {
-        SDL_DestroyTexture(texture);
-        SDL_Log("Invalid frame count calculated.");
-        return;
+        throw std::invalid_argument("Invalid frame count calculated.");
     }
 
     frame_count_ = static_cast<uint8_t>(frame_count);
-    frames_texture_ptr_.reset(texture);
-    loaded_ = true;
+    frames_texture_ptr_ = frames_texture_ptr;
 }
 
 void Sprite::addAnimation(const SpriteAnimationFace face, const uint8_t offset_index) {

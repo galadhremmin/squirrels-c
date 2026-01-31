@@ -6,6 +6,7 @@
 #include <memory>
 #include <unordered_map>
 
+#include "../renderer/Texture.h"
 #include "../utils/Timer.h"
 
 typedef enum {
@@ -24,7 +25,9 @@ struct SpriteAnimationState {
 
 class Sprite {
   public:
-    explicit Sprite(const size_t frame_width, const size_t frame_height);
+    explicit Sprite(const squirrel::Texture* frames_texture_ptr,
+                    const size_t frame_width,
+                    const size_t frame_height);
     ~Sprite();
 
     // Not copyable, but movable since sprites retains SDL texture pointers which shouldn't be
@@ -35,11 +38,10 @@ class Sprite {
     Sprite& operator=(Sprite&&) noexcept = default;
 
     /**
-     * Initializes the sprite by loading it from the given filename.
-     * @param sdl_renderer_ptr The SDL renderer to use to load the sprite.
-     * @param sprite_filename The filename of the sprite to load without file extension.
+     * Resets the sprite to the given texture pointer.
+     * @param frames_texture_ptr The texture pointer to reset the sprite to.
      */
-    void load(SDL_Renderer* const sdl_renderer_ptr, const std::string& sprite_filename);
+    void reset(const squirrel::Texture* frames_texture_ptr);
 
     /**
      * Adds the animation for the given face.
@@ -78,18 +80,14 @@ class Sprite {
     size_t getFrameHeight() const {
         return frame_height_;
     }
-    bool getIsLoaded() const {
-        return loaded_;
-    }
     SDL_Texture* getTexturePtr() const {
-        return frames_texture_ptr_.get();
+        return frames_texture_ptr_->texture;
     }
 
   private:
-    std::unique_ptr<SDL_Texture, decltype(&SDL_DestroyTexture)> frames_texture_ptr_;
+    const squirrel::Texture* frames_texture_ptr_;
     uint8_t frame_count_;
     size_t frame_width_;
     size_t frame_height_;
-    bool loaded_;
     std::unordered_map<SpriteAnimationFace, uint8_t> offset_indices_by_animation_face_;
 };

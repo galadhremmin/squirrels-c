@@ -28,7 +28,7 @@ GameApp::GameApp() : window_{}, renderer_{} {
 }
 
 int GameApp::run() {
-    World world(renderer_);
+    World world(renderer_, window_);
 
     Timer timer = {
         .current_time_ns = SDL_GetTicksNS(),
@@ -61,7 +61,6 @@ int GameApp::run() {
         timer.delta_time = (float)time_diff / 1000000000.0f;
 
         world.update(timer);
-        world.render(timer);
 
         timer.current_time_ns = current_time_ns;
     }

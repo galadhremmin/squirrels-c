@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "../agent/Agent.h"
+#include "../renderer/Background.h"
 #include "../renderer/Renderer.h"
 #include "../sprites/Sprite.h"
 #include "../utils/Timer.h"
@@ -19,7 +20,8 @@ typedef enum {
 
 class World {
   public:
-    explicit World(const std::shared_ptr<SDL_Renderer>& renderer);
+    explicit World(const std::shared_ptr<SDL_Renderer>& renderer,
+                   const std::shared_ptr<SDL_Window>& window);
 
     // Not copyable or movable
     World(const World&) = delete;
@@ -29,16 +31,18 @@ class World {
 
     void processInput(const SDL_Event& event);
     void update(const Timer& timer);
-    void render(const Timer& timer);
 
   private:
-    bool initSprites();
-    bool initAgents();
-    bool initStateMachines();
+    void initSprites();
+    void initWorld();
+    void initAgents();
+    void initStateMachines();
 
     std::unordered_map<WorldSpriteType, Sprite> sprites_;
     std::vector<Agent> agents_;
     Renderer renderer_;
+    std::shared_ptr<SDL_Window> window_;
     size_t player_agent_index_;
     std::unique_ptr<StateMachine> player_agent_state_machine_;
+    squirrel::Background background_;
 };

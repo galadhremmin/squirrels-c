@@ -6,16 +6,33 @@
 #include "../agent/Agent.h"
 #include "../sprites/Sprite.h"
 #include "../utils/Timer.h"
+#include "Background.h"
+#include "Texture.h"
 
 class Renderer {
   public:
     explicit Renderer(const std::shared_ptr<SDL_Renderer>& renderer);
 
+    // Not copyable or movable.
+    Renderer(const Renderer&) = delete;
+    Renderer& operator=(const Renderer&) = delete;
+    Renderer(Renderer&&) noexcept = delete;
+    Renderer& operator=(Renderer&&) noexcept = delete;
+
+    const squirrel::Texture* loadTexture(const std::string& name);
+    SDL_Color getTextureColor(const std::string& name, const uint32_t x, const uint32_t y);
+    void setViewportSize(const int width, const int height);
     void beginScene() const;
     void endScene() const;
-    void render(const Agent& agent, const Timer& timer);
+    void render(const Agent& agent);
+    void renderBackground(const squirrel::Background& background);
+
     SDL_Renderer* getSdlRendererPtr() const {
         return renderer_.get();
+    }
+
+    const SDL_Rect& getViewportSize() const {
+        return viewport_size_;
     }
 
   private:
@@ -23,6 +40,11 @@ class Renderer {
                       const SpriteAnimationFace face,
                       const uint8_t frame_number,
                       const SDL_FRect& dst_rect);
+    static void freeLoadedTexture(squirrel::Texture* texture);
 
     const std::shared_ptr<SDL_Renderer>& renderer_;
+    std::unordered_map<std::string,
+                       std::unique_ptr<squirrel::Texture, decltype(&freeLoadedTexture)>>
+        textures_;
+    SDL_Rect viewport_size_;
 };
