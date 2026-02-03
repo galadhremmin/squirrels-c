@@ -27,7 +27,7 @@ int StateMachine::getPreviousStateId() const {
     return previous_state_id_;
 }
 
-void StateMachine::pushState(const int next_id) {
+void StateMachine::enqueueNextState(const int next_id) noexcept {
     if (!state_provider_.hasState(next_id)) {
         SDL_Log("[ERROR] Invalid state id: %d", next_id);
         return;
@@ -41,14 +41,7 @@ void StateMachine::pushState(const int next_id) {
         const int last_pending_state_id = next_states_.back();
         const auto& last_def = state_provider_.getStateDefinition(last_pending_state_id);
 
-        if (!last_def.is_terminal_state) {
-            SDL_Log("Cannot push state %d, next state %d is a terminal state",
-                    next_id,
-                    last_pending_state_id);
-            return;
-        }
-
-        if (next_states_.size() == next_states_.max_size() - 1) {
+        if (next_states_.size() == next_states_.max_size()) {
             if (!last_def.is_cancellable_on_queue) {
                 SDL_Log("Cannot push state %d, next state %d is not cancellable on queue and next "
                         "states count is at max",
@@ -68,6 +61,16 @@ void StateMachine::pushState(const int next_id) {
     }
 }
 
+int StateMachine::popCurrentState() noexcept {
+    if (next_states_.empty()) {
+        return kStateMachineInvalidStateId;
+    }
+    const int state_id = next_states_.front();
+    next_states_.pop_front();
+    current_state_id_ = kStateMachineDefaultStateId;
+    return state_id;
+}
+
 void StateMachine::reset() {
     current_state_id_ = kStateMachineDefaultStateId;
     current_state_start_time_ns_ = 0;
@@ -81,6 +84,12 @@ int StateMachine::update(const Timer& timer) {
     }
 
     const auto& current_def = state_provider_.getStateDefinition(current_state_id_);
+
+    if (current_def.is_permanent_until_popped) {
+        // there isn't a state change, so return an invalid state id to indicate that the
+        // current state is still valid
+        return kStateMachineInvalidStateId;
+    }
 
     int new_state_id = kStateMachineInvalidStateId;
 

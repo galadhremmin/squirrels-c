@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "../agent/Agent.h"
+#include "../physics/Physics.h"
 #include "../renderer/Background.h"
 #include "../renderer/Renderer.h"
 #include "../sprites/Sprite.h"
@@ -40,9 +41,11 @@ class World {
 
     std::unordered_map<WorldSpriteType, Sprite> sprites_;
     std::vector<Agent> agents_;
+    Physics physics_;
     Renderer renderer_;
     std::shared_ptr<SDL_Window> window_;
     size_t player_agent_index_;
     std::unique_ptr<StateMachine> player_agent_state_machine_;
     squirrel::Background background_;
+    int ground_y_;
 };

@@ -1,8 +1,11 @@
 #pragma once
 
+#include <cmath>
 #include <memory>
 #include <string>
 
+#include "../physics/Polar.h"
+#include "../physics/Vector.h"
 #include "../sprites/Sprite.h"
 #include "../states/StateMachine.h"
 
@@ -12,13 +15,9 @@ class Agent {
     explicit Agent(std::string n) : name_(std::move(n)) {
     }
 
-    // Direct member access (World owns sprites, agents hold raw pointers)
     std::string name_;
     Sprite* sprite_ = nullptr;
-    float position_x_ = 0.0f;
-    float position_y_ = 0.0f;
-    float velocity_x_ = 0.0f;
-    float velocity_y_ = 0.0f;
-    float direction_ = 0.0f;
+    squirrel::Vector2f position_{};
+    squirrel::Polar2f velocity_{};
     SpriteAnimationState animation_state_{};
 };

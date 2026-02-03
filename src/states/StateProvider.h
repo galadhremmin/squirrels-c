@@ -8,11 +8,11 @@
 #include "../utils/Timer.h"
 
 struct StateDefinition {
-    bool is_cancellable_on_queue;
-    bool is_terminal_state;
-    bool is_transient = false;
-    std::uint64_t duration_ns = 0;
-    int state_id_after_expiry = -1;
+    bool is_cancellable_on_queue{true};
+    bool is_transient{false};
+    bool is_permanent_until_popped{false};
+    std::uint64_t duration_ns{0};
+    int state_id_after_expiry{-1};
 };
 
 class StateProvider {

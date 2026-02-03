@@ -25,7 +25,8 @@ class StateMachine {
     int getCurrentStateId() const;
     int getPreviousStateId() const;
 
-    void pushState(const int next_id);
+    void enqueueNextState(const int next_id) noexcept;
+    int popCurrentState() noexcept;
     int update(const Timer& timer);
     void reset();
 
