@@ -4,7 +4,6 @@
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_surface.h>
 #include <SDL3_image/SDL_image.h>
-#include <cmath>
 #include <stdexcept>
 
 Renderer::Renderer(const std::shared_ptr<SDL_Renderer>& renderer) : renderer_(renderer) {
@@ -139,8 +138,8 @@ void Renderer::render(const Agent& agent) {
     }
 
     SDL_FRect dst_rect = {
-        .x = agent.position_x_,
-        .y = agent.position_y_,
+        .x = agent.position_.x,
+        .y = agent.position_.y,
         .w = static_cast<float>(agent.sprite_->getFrameWidth()) * 2.0f,
         .h = static_cast<float>(agent.sprite_->getFrameHeight()) * 2.0f,
     };
