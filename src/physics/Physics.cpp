@@ -1,5 +1,6 @@
 #include "Physics.h"
 
+#include <cmath>
 #include "../agent/Agent.h"
 
 void Physics::step(Agent& agent, const Timer& timer) const {

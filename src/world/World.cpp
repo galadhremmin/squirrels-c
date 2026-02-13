@@ -177,9 +177,10 @@ void World::initAgents() {
     player.position_.x = (w - 32) / 2.0f;
     player.position_.y = (h - 64 * 1.5);
 
+    ground_y_ = player.position_.y;
+    
     agents_.push_back(std::move(player));
     player_agent_index_ = 0;
-    ground_y_ = player.position_.y;
 }
 
 void World::initStateMachines() {

@@ -11,7 +11,7 @@
 
 class Renderer {
   public:
-    explicit Renderer(const std::shared_ptr<SDL_Renderer>& renderer);
+    explicit Renderer(const std::shared_ptr<SDL_Renderer> renderer);
 
     // Not copyable or movable.
     Renderer(const Renderer&) = delete;
@@ -42,7 +42,7 @@ class Renderer {
                       const SDL_FRect& dst_rect);
     static void freeLoadedTexture(squirrel::Texture* texture);
 
-    const std::shared_ptr<SDL_Renderer>& renderer_;
+    const std::shared_ptr<SDL_Renderer> renderer_;
     std::unordered_map<std::string,
                        std::unique_ptr<squirrel::Texture, decltype(&freeLoadedTexture)>>
         textures_;

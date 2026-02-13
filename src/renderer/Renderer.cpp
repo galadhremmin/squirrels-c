@@ -6,7 +6,7 @@
 #include <SDL3_image/SDL_image.h>
 #include <stdexcept>
 
-Renderer::Renderer(const std::shared_ptr<SDL_Renderer>& renderer) : renderer_(renderer) {
+Renderer::Renderer(const std::shared_ptr<SDL_Renderer> renderer) : renderer_(renderer) {
     if (renderer == nullptr) {
         throw std::runtime_error("Renderer must not be null");
     }
@@ -173,4 +173,6 @@ void Renderer::freeLoadedTexture(squirrel::Texture* texture_ptr) {
     texture_ptr->texture = nullptr;
     texture_ptr->width = 0.0f;
     texture_ptr->height = 0.0f;
+
+    delete texture_ptr;
 }

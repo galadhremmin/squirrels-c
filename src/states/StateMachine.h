@@ -14,7 +14,7 @@ class StateMachine {
   public:
     explicit StateMachine(StateProvider&& state_provider,
                           const int initial_state_id = 0,
-                          const std::size_t max_pending_states = 10);
+                          const size_t max_pending_states = 10);
     ~StateMachine() = default;
 
     StateMachine(const StateMachine&) = delete;
@@ -36,4 +36,5 @@ class StateMachine {
     int previous_state_id_{kStateMachineDefaultStateId};
     uint64_t current_state_start_time_ns_ = 0;
     std::deque<int> next_states_;
+    const size_t max_pending_states_;
 };

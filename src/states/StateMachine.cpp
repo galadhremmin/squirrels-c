@@ -5,9 +5,9 @@
 
 StateMachine::StateMachine(StateProvider&& state_provider,
                            const int initial_state_id,
-                           const std::size_t max_pending_states)
+                           const size_t max_pending_states)
     : state_provider_(std::move(state_provider)), current_state_id_(initial_state_id),
-      next_states_(max_pending_states) {
+      next_states_(), max_pending_states_(max_pending_states) {
     if (state_provider_.hasState(kStateMachineInvalidStateId)) {
         throw std::invalid_argument("The state provider must not implement the invalid state.");
     }
@@ -41,7 +41,7 @@ void StateMachine::enqueueNextState(const int next_id) noexcept {
         const int last_pending_state_id = next_states_.back();
         const auto& last_def = state_provider_.getStateDefinition(last_pending_state_id);
 
-        if (next_states_.size() == next_states_.max_size()) {
+        if (next_states_.size() == max_pending_states_) {
             if (!last_def.is_cancellable_on_queue) {
                 SDL_Log("Cannot push state %d, next state %d is not cancellable on queue and next "
                         "states count is at max",
@@ -54,7 +54,7 @@ void StateMachine::enqueueNextState(const int next_id) noexcept {
         }
     }
 
-    if (next_states_.size() < next_states_.max_size()) {
+    if (next_states_.size() < max_pending_states_) {
         next_states_.push_back(next_id);
     } else {
         SDL_Log("Cannot push state %d, next states count is at max", next_id);
