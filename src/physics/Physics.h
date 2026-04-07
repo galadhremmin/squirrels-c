@@ -1,10 +1,6 @@
 #pragma once
 
-#include <utility>
-
 #include "../utils/Timer.h"
-#include "Polar.h"
-#include "Vector.h"
 
 class Agent;
 
@@ -19,11 +15,9 @@ class Physics {
     }
 
     void step(Agent& agent, const Timer& timer) const;
-    void applyForce(Agent& agent, const squirrel::Polar2f& force) const;
+    void applyJumpImpulse(Agent& agent) const;
 
   private:
-    inline squirrel::Vector2f calculateVector2f(const squirrel::Polar2f& polar) const;
-    inline void applyGravity(Agent& agent, squirrel::Vector2f& vector, const Timer& timer) const;
-
     float gravity_ = 200.0f;
+    float jump_speed_ = 400.0f;
 };

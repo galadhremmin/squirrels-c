@@ -133,19 +133,21 @@ void Renderer::renderBackground(const squirrel::Background& background) {
 }
 
 void Renderer::render(const Agent& agent) {
-    if (agent.sprite_ == nullptr) {
+    if (agent.getSprite() == nullptr) {
         return;
     }
 
     SDL_FRect dst_rect = {
-        .x = agent.position_.x,
-        .y = agent.position_.y,
-        .w = static_cast<float>(agent.sprite_->getFrameWidth()) * 2.0f,
-        .h = static_cast<float>(agent.sprite_->getFrameHeight()) * 2.0f,
+        .x = agent.getPosition().x,
+        .y = agent.getPosition().y,
+        .w = static_cast<float>(agent.getSprite()->getFrameWidth()) * 2.0f,
+        .h = static_cast<float>(agent.getSprite()->getFrameHeight()) * 2.0f,
     };
 
-    renderSprite(
-        *agent.sprite_, agent.animation_state_.face, agent.animation_state_.frame_number, dst_rect);
+    renderSprite(*agent.getSprite(),
+                 agent.getAnimationState().face,
+                 agent.getAnimationState().frame_number,
+                 dst_rect);
 }
 
 void Renderer::renderSprite(const Sprite& sprite,

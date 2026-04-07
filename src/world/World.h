@@ -1,12 +1,12 @@
 #pragma once
 #include <SDL3/SDL.h>
 
-#include <array>
 #include <memory>
 #include <unordered_map>
 #include <vector>
 
 #include "../agent/Agent.h"
+#include "../agent/AgentState.h"
 #include "../physics/Physics.h"
 #include "../renderer/Background.h"
 #include "../renderer/Renderer.h"
@@ -37,7 +37,9 @@ class World {
     void initSprites();
     void initWorld();
     void initAgents();
-    void initStateMachines();
+
+    bool resolveCollision(Agent& agent) const;
+    void updatePlayerAnimation(Agent& agent);
 
     std::unordered_map<WorldSpriteType, Sprite> sprites_;
     std::vector<Agent> agents_;
@@ -45,7 +47,15 @@ class World {
     Renderer renderer_;
     std::shared_ptr<SDL_Window> window_;
     size_t player_agent_index_;
-    std::unique_ptr<StateMachine> player_agent_state_machine_;
     squirrel::Background background_;
-    int ground_y_;
+    float ground_y_;
+
+    // Input state
+    bool input_left_ = false;
+    bool input_right_ = false;
+    bool input_jump_ = false;
+
+    // Animation tracking (to avoid unnecessary resets)
+    AgentStateId prev_anim_state_ = AGENT_STATE_IDLE;
+    SpriteAnimationFace prev_face_ = SPRITE_ANIMATION_FACE_FRONT;
 };

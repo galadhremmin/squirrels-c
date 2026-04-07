@@ -18,9 +18,9 @@ typedef enum {
 
 struct SpriteAnimationState {
     SpriteAnimationFace face;
-    uint64_t last_frame_time;
-    float fps;
-    uint8_t frame_number;
+    uint64_t last_frame_time = 0;
+    float fps = 0;
+    uint8_t frame_number = 0;
 };
 
 class Sprite {
