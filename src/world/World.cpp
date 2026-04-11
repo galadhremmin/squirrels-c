@@ -35,15 +35,20 @@ void World::update(const Timer& timer) {
         physics_.applyJumpImpulse(player);
     }
 
-    // Phase 2: Integrate physics, then resolve collision
-    physics_.step(player, timer);
-    player.setIsGrounded(resolveCollision(player));
-
-    // Phase 3: Derive animation sprite/face from physics state (only resets on change)
-    updatePlayerAnimation(player);
-
     // Advance animation frames for all agents
     for (auto& agent : agents_) {
+        physics_.step(agent, timer);
+
+        if (&agent == &player) {
+            // Derive animation sprite/face from physics state (only resets on change)
+            updatePlayerAnimation(agent);
+        }
+
+        const bool is_grounded = resolveCollision(agent);
+        if (agent.getIsGrounded() != is_grounded) {
+            agent.setIsGrounded(is_grounded);
+        }
+
         agent.getSprite()->updateAnimationState(agent.getMutableAnimationState(), timer);
     }
 
@@ -124,6 +129,7 @@ void World::processInput(const SDL_Event& event) {
 
 void World::initWorld() {
     background_.ground_texture_name = "ground";
+    background_.trees_texture_name = "trees";
     background_.sky_texture_name = "sky";
     background_.sky_color = renderer_.getTextureColor("sky", 0, 323);
 
@@ -145,6 +151,13 @@ void World::initSprites() {
     fox_run_sprite.addAnimation(SPRITE_ANIMATION_FACE_RIGHT, 2);
     fox_run_sprite.addAnimation(SPRITE_ANIMATION_FACE_LEFT, 3);
     sprites_.insert({WORLD_SPRITE_TYPE_FOX_RUN, std::move(fox_run_sprite)});
+
+    Sprite bird_fly_sprite(renderer_.loadTexture("bird_fly"), 32, 32);
+    bird_fly_sprite.addAnimation(SPRITE_ANIMATION_FACE_FRONT, 0);
+    bird_fly_sprite.addAnimation(SPRITE_ANIMATION_FACE_BACK, 1);
+    bird_fly_sprite.addAnimation(SPRITE_ANIMATION_FACE_LEFT, 2);
+    bird_fly_sprite.addAnimation(SPRITE_ANIMATION_FACE_RIGHT, 3);
+    sprites_.insert({WORLD_SPRITE_TYPE_BIRD_FLYING, std::move(bird_fly_sprite)});
 }
 
 void World::initAgents() {
@@ -160,9 +173,18 @@ void World::initAgents() {
                      .fps = 4.0f,
                  }};
     player.setSprite(&sprites_.at(WORLD_SPRITE_TYPE_FOX_IDLE));
+    agents_.push_back(std::move(player));
+    player_agent_index_ = 0;
 
     ground_y_ = player.getPosition().y;
 
-    agents_.push_back(std::move(player));
-    player_agent_index_ = 0;
+    // create birds
+    Agent bird("bird",
+               squirrel::Vector2f{45, 45},
+               SpriteAnimationState{
+                   .face = SPRITE_ANIMATION_FACE_RIGHT,
+                   .fps = 8.0f,
+               });
+    bird.setSprite(&sprites_.at(WORLD_SPRITE_TYPE_BIRD_FLYING));
+    agents_.push_back(std::move(bird));
 }

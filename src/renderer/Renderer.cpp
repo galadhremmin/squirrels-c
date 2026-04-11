@@ -57,8 +57,6 @@ const squirrel::Texture* Renderer::loadTexture(const std::string& name) {
 }
 
 SDL_Color Renderer::getTextureColor(const std::string& name, const uint32_t x, const uint32_t y) {
-    const squirrel::Texture* texture = loadTexture(name);
-
     SDL_Color default_color{};
 
     std::string path = "assets/textures/" + name + ".png";
@@ -108,6 +106,7 @@ void Renderer::renderBackground(const squirrel::Background& background) {
 
     const squirrel::Texture* sky_texture = loadTexture(background.sky_texture_name);
     const squirrel::Texture* ground_texture = loadTexture(background.ground_texture_name);
+    const squirrel::Texture* tree_texture = loadTexture(background.trees_texture_name);
 
     SDL_FRect sky_dst_rect = {
         // The sky offset is intended to give the illusion of a scrolling background. By negating
@@ -120,6 +119,15 @@ void Renderer::renderBackground(const squirrel::Background& background) {
         .h = sky_texture->height,
     };
     SDL_RenderTextureTiled(renderer_.get(), sky_texture->texture, nullptr, 1.0f, &sky_dst_rect);
+
+    const float trees_offset_x = 0;
+    SDL_FRect trees_dst_rect = {
+        .x = -trees_offset_x,
+        .y = static_cast<float>(viewport_size_.h) - tree_texture->height * 1.1,
+        .w = static_cast<float>(viewport_size_.w) + trees_offset_x,
+        .h = tree_texture->height,
+    };
+    SDL_RenderTextureTiled(renderer_.get(), tree_texture->texture, nullptr, 1.0f, &trees_dst_rect);
 
     // The ground should be at the bottom of the viewport.
     SDL_FRect ground_dst_rect = {
