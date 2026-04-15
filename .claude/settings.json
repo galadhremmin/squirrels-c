@@ -1,0 +1,13 @@
+{
+  "lsp": {
+    "clangd": {
+      "command": "clangd",
+      "args": [
+        "--background-index",
+        "--clang-tidy",
+        "--header-insertion=never",
+        "--completion-style=detailed"
+      ]
+    }
+  }
+}

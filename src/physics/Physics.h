@@ -14,7 +14,7 @@ class Physics {
         return gravity_;
     }
 
-    void step(Agent& agent, const Timer& timer) const;
+    void update(Agent& agent, const Timer& timer) const;
     void applyJumpImpulse(Agent& agent) const;
 
   private:

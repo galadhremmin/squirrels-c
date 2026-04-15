@@ -2,15 +2,13 @@
 #include <SDL3/SDL_video.h>
 #include <SDL3_image/SDL_image.h>
 
-#include "../agent/Agent.h"
-#include "../agent/AgentState.h"
+#include "../agent/BirdAgent.h"
+#include "../agent/PlayerAgent.h"
 #include "World.h"
-
-static constexpr float kMoveSpeed = 150.0f;
 
 World::World(const std::shared_ptr<SDL_Renderer>& renderer,
              const std::shared_ptr<SDL_Window>& window)
-    : renderer_(renderer), window_(window), player_agent_index_(SIZE_MAX) {
+    : renderer_(renderer), window_(window) {
 
     int w, h;
     SDL_GetWindowSizeInPixels(window_.get(), &w, &h);
@@ -20,36 +18,14 @@ World::World(const std::shared_ptr<SDL_Renderer>& renderer,
 }
 
 void World::update(const Timer& timer) {
-    auto& player = agents_.at(player_agent_index_);
-
-    // Phase 1: Apply input to horizontal velocity; gate jump on is_grounded
-    if (input_left_) {
-        player.getMutableVelocity().x = -kMoveSpeed;
-    } else if (input_right_) {
-        player.getMutableVelocity().x = kMoveSpeed;
-    } else {
-        player.getMutableVelocity().x = 0.0f;
-    }
-
-    if (input_jump_ && player.getIsGrounded()) {
-        physics_.applyJumpImpulse(player);
-    }
-
-    // Advance animation frames for all agents
     for (auto& agent : agents_) {
-        physics_.step(agent, timer);
+        agent->update(timer);
+        physics_.update(*agent, timer);
 
-        if (&agent == &player) {
-            // Derive animation sprite/face from physics state (only resets on change)
-            updatePlayerAnimation(agent);
-        }
+        agent->setIsGrounded(false);
+        resolveViewportBoundary(*agent);
 
-        const bool is_grounded = resolveCollision(agent);
-        if (agent.getIsGrounded() != is_grounded) {
-            agent.setIsGrounded(is_grounded);
-        }
-
-        agent.getSprite()->updateAnimationState(agent.getMutableAnimationState(), timer);
+        agent->getSprite()->updateAnimationState(agent->getMutableAnimationState(), timer);
     }
 
     // Scroll sky
@@ -61,73 +37,48 @@ void World::update(const Timer& timer) {
     renderer_.beginScene();
     renderer_.renderBackground(background_);
     for (const auto& agent : agents_) {
-        renderer_.render(agent);
+        renderer_.render(*agent);
     }
     renderer_.endScene();
 }
 
-bool World::resolveCollision(Agent& agent) const {
-    if (agent.getPosition().y >= ground_y_) {
-        agent.getMutablePosition().y = ground_y_;
-        agent.getMutableVelocity().y = 0.0f;
-        return true;
-    }
-    return false;
-}
-
-void World::updatePlayerAnimation(Agent& agent) {
-    AgentStateId anim_state;
-    SpriteAnimationFace face;
-
-    if (agent.getVelocity().x < 0.0f) {
-        anim_state = AGENT_STATE_RUNNING;
-        face = SPRITE_ANIMATION_FACE_LEFT;
-    } else if (agent.getVelocity().x > 0.0f) {
-        anim_state = AGENT_STATE_RUNNING;
-        face = SPRITE_ANIMATION_FACE_RIGHT;
-    } else {
-        anim_state = AGENT_STATE_IDLE;
-        face = SPRITE_ANIMATION_FACE_FRONT;
+void World::resolveViewportBoundary(Agent& agent) const {
+    float sprite_w = 0.0f, sprite_h = 0.0f;
+    if (const Sprite* s = agent.getSprite()) {
+        sprite_w = static_cast<float>(s->getFrameWidth());
+        sprite_h = static_cast<float>(s->getFrameHeight());
     }
 
-    if (anim_state != prev_anim_state_ || face != prev_face_) {
-        Sprite* next_sprite = (anim_state == AGENT_STATE_RUNNING)
-                                  ? &sprites_.at(WORLD_SPRITE_TYPE_FOX_RUN)
-                                  : &sprites_.at(WORLD_SPRITE_TYPE_FOX_IDLE);
-        if (agent.getSprite() != next_sprite) {
-            agent.setSprite(next_sprite);
-        }
-        Sprite::resetAnimationState(agent.getMutableAnimationState(), face);
-        prev_anim_state_ = anim_state;
-        prev_face_ = face;
+    uint8_t edges = VIEWPORT_EDGE_NONE;
+    if (agent.getPosition().x < viewport_bounds_.left - sprite_w - 1) {
+        edges |= VIEWPORT_EDGE_LEFT | VIEWPORT_OUTSIDE;
+    }
+
+    if (agent.getPosition().x > viewport_bounds_.right + sprite_w + 1) {
+        edges |= VIEWPORT_EDGE_RIGHT | VIEWPORT_OUTSIDE;
+    }
+
+    if (agent.getPosition().y - sprite_h < viewport_bounds_.top) {
+        edges |= VIEWPORT_EDGE_TOP | VIEWPORT_OUTSIDE;
+    }
+
+    if (agent.getPosition().y > viewport_bounds_.bottom) {
+        edges |= VIEWPORT_EDGE_BOTTOM | VIEWPORT_OUTSIDE;
+    }
+
+    if (edges != VIEWPORT_EDGE_NONE) {
+        agent.onViewportBoundaryCollision(viewport_bounds_, edges);
     }
 }
 
 void World::processInput(const SDL_Event& event) {
-    const bool keydown = (event.type == SDL_EVENT_KEY_DOWN);
-    const bool keyup = (event.type == SDL_EVENT_KEY_UP);
-
-    if ((!keydown && !keyup) || event.key.repeat)
-        return;
-
-    switch (event.key.scancode) {
-    case SDL_SCANCODE_LEFT:
-    case SDL_SCANCODE_A:
-        input_left_ = keydown;
-        break;
-    case SDL_SCANCODE_RIGHT:
-    case SDL_SCANCODE_D:
-        input_right_ = keydown;
-        break;
-    case SDL_SCANCODE_SPACE:
-        input_jump_ = keydown;
-        break;
-    default:
-        break;
-    }
+    player_->processInput(event);
 }
 
 void World::initWorld() {
+    const SDL_Rect& vp = renderer_.getViewportSize();
+    viewport_bounds_ = {0.0f, 0.0f, static_cast<float>(vp.w), (vp.h - 64.0f * 1.5f)};
+
     background_.ground_texture_name = "ground";
     background_.trees_texture_name = "trees";
     background_.sky_texture_name = "sky";
@@ -162,29 +113,21 @@ void World::initSprites() {
 
 void World::initAgents() {
     agents_.clear();
+    player_ = nullptr;
 
-    int w, h;
-    SDL_GetWindowSizeInPixels(window_.get(), &w, &h);
-
-    Agent player{"player",
-                 squirrel::Vector2f{(w - 32.0f) / 2.0f, (h - 64.0f * 1.5f)},
-                 SpriteAnimationState{
-                     .face = SPRITE_ANIMATION_FACE_FRONT,
-                     .fps = 4.0f,
-                 }};
-    player.setSprite(&sprites_.at(WORLD_SPRITE_TYPE_FOX_IDLE));
+    auto player = std::make_unique<PlayerAgent>(
+        squirrel::Vector2f{(viewport_bounds_.right - 32.0f) / 2.0f, viewport_bounds_.bottom},
+        SpriteAnimationState{.face = SPRITE_ANIMATION_FACE_FRONT, .fps = 4.0f},
+        &sprites_.at(WORLD_SPRITE_TYPE_FOX_IDLE),
+        &sprites_.at(WORLD_SPRITE_TYPE_FOX_RUN),
+        physics_);
+    player_ = player.get();
     agents_.push_back(std::move(player));
-    player_agent_index_ = 0;
 
-    ground_y_ = player.getPosition().y;
-
-    // create birds
-    Agent bird("bird",
-               squirrel::Vector2f{45, 45},
-               SpriteAnimationState{
-                   .face = SPRITE_ANIMATION_FACE_RIGHT,
-                   .fps = 8.0f,
-               });
-    bird.setSprite(&sprites_.at(WORLD_SPRITE_TYPE_BIRD_FLYING));
+    auto bird = std::make_unique<BirdAgent>(
+        squirrel::Vector2f{45, 45},
+        SpriteAnimationState{.face = SPRITE_ANIMATION_FACE_RIGHT, .fps = 8.0f},
+        &sprites_.at(WORLD_SPRITE_TYPE_BIRD_FLYING));
+    bird->reset(viewport_bounds_);
     agents_.push_back(std::move(bird));
 }

@@ -1,0 +1,32 @@
+#pragma once
+
+#include <SDL3/SDL.h>
+
+#include "Agent.h"
+#include "AgentState.h"
+#include "../physics/Physics.h"
+#include "../sprites/Sprite.h"
+
+class PlayerAgent : public Agent {
+  public:
+    PlayerAgent(squirrel::Vector2f position, SpriteAnimationState animation_state,
+                Sprite* idle_sprite, Sprite* run_sprite, Physics& physics);
+
+    void processInput(const SDL_Event& event);
+    void update(const Timer& timer) override;
+    void onViewportBoundaryCollision(const ViewportBounds& bounds, uint8_t edges) override;
+
+  private:
+    static constexpr float kMoveSpeed = 150.0f;
+
+    Physics& physics_;
+    Sprite* idle_sprite_;
+    Sprite* run_sprite_;
+
+    bool input_left_ = false;
+    bool input_right_ = false;
+    bool input_jump_ = false;
+
+    AgentStateId prev_anim_state_ = AGENT_STATE_IDLE;
+    SpriteAnimationFace prev_face_ = SPRITE_ANIMATION_FACE_FRONT;
+};
