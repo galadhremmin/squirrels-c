@@ -123,7 +123,7 @@ void Renderer::renderBackground(const squirrel::Background& background) {
     const float trees_offset_x = 0;
     SDL_FRect trees_dst_rect = {
         .x = -trees_offset_x,
-        .y = static_cast<float>(viewport_size_.h) - tree_texture->height * 1.1,
+        .y = static_cast<float>(viewport_size_.h) - tree_texture->height * 1.1f,
         .w = static_cast<float>(viewport_size_.w) + trees_offset_x,
         .h = tree_texture->height,
     };

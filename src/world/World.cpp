@@ -54,10 +54,10 @@ void World::resolveViewportBoundary(Agent& agent) const {
         }
     }
 
-    if (agent.getPosition().x > viewport_bounds_.right - size.w - 1) {
+    if (agent.getPosition().x > viewport_bounds_.right - size.w) {
         edges |= VIEWPORT_EDGE_RIGHT;
 
-        if (agent.getPosition().x > viewport_bounds_.right) {
+        if (agent.getPosition().x > viewport_bounds_.right + 1) {
             edges |= VIEWPORT_OUTSIDE;
         }
     }
@@ -65,7 +65,7 @@ void World::resolveViewportBoundary(Agent& agent) const {
     if (agent.getPosition().y < viewport_bounds_.top) {
         edges |= VIEWPORT_EDGE_TOP;
 
-        if (agent.getPosition().y < viewport_bounds_.top - size.h) {
+        if (agent.getPosition().y < viewport_bounds_.top - size.h - 1) {
             edges |= VIEWPORT_OUTSIDE;
         }
     }
@@ -73,7 +73,7 @@ void World::resolveViewportBoundary(Agent& agent) const {
     if (agent.getPosition().y > viewport_bounds_.bottom) {
         edges |= VIEWPORT_EDGE_BOTTOM;
 
-        if (agent.getPosition().y > viewport_bounds_.bottom + size.h) {
+        if (agent.getPosition().y > viewport_bounds_.bottom + size.h + 1) {
             edges |= VIEWPORT_OUTSIDE;
         }
     }

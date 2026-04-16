@@ -16,6 +16,8 @@ class Agent {
 
     virtual void update(const Timer& timer) = 0;
     virtual void onViewportBoundaryCollision(const ViewportBounds& bounds, uint8_t edges) {
+        (void)bounds;
+        (void)edges;
     }
 
     const std::string& getName() const {
@@ -83,11 +85,11 @@ class Agent {
     }
 
     std::string name_;
+    squirrel::Vector2f position_;
     squirrel::Sizef size_;
+    SpriteAnimationState animation_state_;
     Sprite* sprite_ = nullptr;
-    squirrel::Vector2f position_{};
     squirrel::Vector2f velocity_{};
-    SpriteAnimationState animation_state_{};
     bool is_grounded_ = false;
     bool is_flying_ = false;
 };

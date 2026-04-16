@@ -53,6 +53,8 @@ void PlayerAgent::onViewportBoundaryCollision(const ViewportBounds& bounds, uint
 }
 
 void PlayerAgent::update(const Timer& timer) {
+    (void)timer;
+
     if (input_left_) {
         getMutableVelocity().x = -kMoveSpeed;
     } else if (input_right_) {
