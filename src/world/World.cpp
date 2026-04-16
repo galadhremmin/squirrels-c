@@ -43,27 +43,39 @@ void World::update(const Timer& timer) {
 }
 
 void World::resolveViewportBoundary(Agent& agent) const {
-    float sprite_w = 0.0f, sprite_h = 0.0f;
-    if (const Sprite* s = agent.getSprite()) {
-        sprite_w = static_cast<float>(s->getFrameWidth());
-        sprite_h = static_cast<float>(s->getFrameHeight());
-    }
+    auto size = agent.getSize();
 
     uint8_t edges = VIEWPORT_EDGE_NONE;
-    if (agent.getPosition().x < viewport_bounds_.left - sprite_w - 1) {
-        edges |= VIEWPORT_EDGE_LEFT | VIEWPORT_OUTSIDE;
+    if (agent.getPosition().x < viewport_bounds_.left) {
+        edges |= VIEWPORT_EDGE_LEFT;
+
+        if (agent.getPosition().x < viewport_bounds_.left - size.w - 1) {
+            edges |= VIEWPORT_OUTSIDE;
+        }
     }
 
-    if (agent.getPosition().x > viewport_bounds_.right + sprite_w + 1) {
-        edges |= VIEWPORT_EDGE_RIGHT | VIEWPORT_OUTSIDE;
+    if (agent.getPosition().x > viewport_bounds_.right - size.w - 1) {
+        edges |= VIEWPORT_EDGE_RIGHT;
+
+        if (agent.getPosition().x > viewport_bounds_.right) {
+            edges |= VIEWPORT_OUTSIDE;
+        }
     }
 
-    if (agent.getPosition().y - sprite_h < viewport_bounds_.top) {
-        edges |= VIEWPORT_EDGE_TOP | VIEWPORT_OUTSIDE;
+    if (agent.getPosition().y < viewport_bounds_.top) {
+        edges |= VIEWPORT_EDGE_TOP;
+
+        if (agent.getPosition().y < viewport_bounds_.top - size.h) {
+            edges |= VIEWPORT_OUTSIDE;
+        }
     }
 
     if (agent.getPosition().y > viewport_bounds_.bottom) {
-        edges |= VIEWPORT_EDGE_BOTTOM | VIEWPORT_OUTSIDE;
+        edges |= VIEWPORT_EDGE_BOTTOM;
+
+        if (agent.getPosition().y > viewport_bounds_.bottom + size.h) {
+            edges |= VIEWPORT_OUTSIDE;
+        }
     }
 
     if (edges != VIEWPORT_EDGE_NONE) {

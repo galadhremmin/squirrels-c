@@ -148,8 +148,8 @@ void Renderer::render(const Agent& agent) {
     SDL_FRect dst_rect = {
         .x = agent.getPosition().x,
         .y = agent.getPosition().y,
-        .w = static_cast<float>(agent.getSprite()->getFrameWidth()) * 2.0f,
-        .h = static_cast<float>(agent.getSprite()->getFrameHeight()) * 2.0f,
+        .w = agent.getSize().w,
+        .h = agent.getSize().h,
     };
 
     renderSprite(*agent.getSprite(),

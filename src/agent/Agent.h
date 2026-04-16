@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "../physics/Size.h"
 #include "../physics/Vector.h"
 #include "../sprites/Sprite.h"
 #include "../utils/Timer.h"
@@ -23,6 +24,10 @@ class Agent {
 
     const Sprite* getSprite() const {
         return sprite_;
+    }
+
+    const squirrel::Sizef& getSize() const {
+        return size_;
     }
 
     const squirrel::Vector2f& getPosition() const {
@@ -70,12 +75,15 @@ class Agent {
     }
 
   protected:
-    explicit Agent(std::string n, squirrel::Vector2f position, SpriteAnimationState animation_state)
-        : name_(std::move(n)), position_(std::move(position)),
-          animation_state_(std::move(animation_state)) {
+    explicit Agent(std::string n,
+                   squirrel::Vector2f position,
+                   squirrel::Sizef size,
+                   SpriteAnimationState animation_state)
+        : name_(std::move(n)), position_(position), size_(size), animation_state_(animation_state) {
     }
 
     std::string name_;
+    squirrel::Sizef size_;
     Sprite* sprite_ = nullptr;
     squirrel::Vector2f position_{};
     squirrel::Vector2f velocity_{};

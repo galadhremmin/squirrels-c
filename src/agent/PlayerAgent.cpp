@@ -1,8 +1,11 @@
 #include "PlayerAgent.h"
 
-PlayerAgent::PlayerAgent(squirrel::Vector2f position, SpriteAnimationState animation_state,
-                         Sprite* idle_sprite, Sprite* run_sprite, Physics& physics)
-    : Agent("player", std::move(position), std::move(animation_state)),
+PlayerAgent::PlayerAgent(squirrel::Vector2f position,
+                         SpriteAnimationState animation_state,
+                         Sprite* idle_sprite,
+                         Sprite* run_sprite,
+                         Physics& physics)
+    : Agent("player", position, squirrel::Sizef{.w = 64.0f, .h = 64.0f}, animation_state),
       physics_(physics), idle_sprite_(idle_sprite), run_sprite_(run_sprite) {
     setSprite(idle_sprite_);
 }
@@ -32,15 +35,15 @@ void PlayerAgent::processInput(const SDL_Event& event) {
 }
 
 void PlayerAgent::onViewportBoundaryCollision(const ViewportBounds& bounds, uint8_t edges) {
-    const float sprite_w = sprite_ ? static_cast<float>(sprite_->getFrameWidth()) : 0.0f;
-
     if (edges & VIEWPORT_EDGE_LEFT) {
         position_.x = bounds.left;
-        if (velocity_.x < 0.0f) velocity_.x = 0.0f;
+        if (velocity_.x < 0.0f)
+            velocity_.x = 0.0f;
     }
     if (edges & VIEWPORT_EDGE_RIGHT) {
-        position_.x = bounds.right - sprite_w;
-        if (velocity_.x > 0.0f) velocity_.x = 0.0f;
+        position_.x = bounds.right - size_.w;
+        if (velocity_.x > 0.0f)
+            velocity_.x = 0.0f;
     }
     if (edges & VIEWPORT_EDGE_BOTTOM) {
         position_.y = bounds.bottom;

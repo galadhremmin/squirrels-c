@@ -6,7 +6,7 @@
 BirdAgent::BirdAgent(squirrel::Vector2f position,
                      SpriteAnimationState animation_state,
                      Sprite* sprite)
-    : Agent("bird", std::move(position), std::move(animation_state)) {
+    : Agent("bird", position, squirrel::Sizef{.w = 64.0f, .h = 64.0f}, animation_state) {
     setSprite(sprite);
     setIsFlying(true);
 }
