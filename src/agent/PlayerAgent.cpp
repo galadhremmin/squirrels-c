@@ -3,11 +3,14 @@
 PlayerAgent::PlayerAgent(squirrel::Vector2f position,
                          SpriteAnimationState animation_state,
                          Sprite* idle_sprite,
+                         Sprite* idle_shadow_sprite,
                          Sprite* run_sprite,
+                         Sprite* run_shadow_sprite,
                          Physics& physics)
     : Agent("player", position, squirrel::Sizef{.w = 64.0f, .h = 64.0f}, animation_state),
-      physics_(physics), idle_sprite_(idle_sprite), run_sprite_(run_sprite) {
-    setSprite(idle_sprite_);
+      physics_(physics), idle_sprite_(idle_sprite), idle_shadow_sprite_(idle_shadow_sprite),
+      run_sprite_(run_sprite), run_shadow_sprite_(run_shadow_sprite) {
+    setSprite(idle_shadow_sprite);
 }
 
 void PlayerAgent::processInput(const SDL_Event& event) {
@@ -63,8 +66,10 @@ void PlayerAgent::update(const Timer& timer) {
         getMutableVelocity().x = 0.0f;
     }
 
+    bool started_jumping = false;
     if (input_jump_ && getIsGrounded()) {
         physics_.applyJumpImpulse(*this);
+        started_jumping = true;
     }
 
     AgentStateId anim_state;
@@ -81,8 +86,11 @@ void PlayerAgent::update(const Timer& timer) {
         face = SPRITE_ANIMATION_FACE_FRONT;
     }
 
-    if (anim_state != prev_anim_state_ || face != prev_face_) {
-        Sprite* next_sprite = (anim_state == AGENT_STATE_RUNNING) ? run_sprite_ : idle_sprite_;
+    if (started_jumping || anim_state != prev_anim_state_ || face != prev_face_) {
+        Sprite* next_sprite =
+            (anim_state == AGENT_STATE_RUNNING)
+                ? ((is_grounded_ && !started_jumping) ? run_shadow_sprite_ : run_sprite_)
+                : ((is_grounded_ && !started_jumping) ? idle_shadow_sprite_ : idle_sprite_);
         if (getSprite() != next_sprite) {
             setSprite(next_sprite);
         }

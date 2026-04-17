@@ -1,7 +1,8 @@
 #include "BirdAgent.h"
 #include <cmath>
 #include <numbers>
-#include <random>
+
+#include "../utils/Random.h"
 
 BirdAgent::BirdAgent(squirrel::Vector2f position,
                      SpriteAnimationState animation_state,
@@ -31,30 +32,24 @@ void BirdAgent::update(const Timer& timer) {
 }
 
 void BirdAgent::reset(const ViewportBounds& bounds) {
-    std::uniform_real_distribution<float> velocity_range{
-        kVelocityMin,
-        kVelocityMax,
-    };
+    auto& rng = squirrel::Random::instance();
 
-    std::uniform_real_distribution<float> y_range{
-        std::fmax(bounds.top, bounds.bottom) * kYRangeMin - 1.0f,
-        std::fmax(bounds.top, bounds.bottom) * kYRangeMax + 1.0f,
-    };
+    const float y_min = std::fmax(bounds.top, bounds.bottom) * kYRangeMin - 1.0f;
+    const float y_max = std::fmax(bounds.top, bounds.bottom) * kYRangeMax + 1.0f;
 
-    std::bernoulli_distribution coin{0.5};
-    if (coin(rng_)) {
+    if (rng.coinFlip()) {
         // left
         position_.x = -size_.w;
-        velocity_.x = velocity_range(rng_);
+        velocity_.x = rng.range(kVelocityMin, kVelocityMax);
         animation_state_.face = SPRITE_ANIMATION_FACE_RIGHT;
     } else {
         // right
         position_.x = bounds.right;
-        velocity_.x = -velocity_range(rng_);
+        velocity_.x = -rng.range(kVelocityMin, kVelocityMax);
         animation_state_.face = SPRITE_ANIMATION_FACE_LEFT;
     }
 
-    position_.y = y_range(rng_);
+    position_.y = rng.range(y_min, y_max);
     SDL_Log("[Bird] Reset position x=%f y=%f, face=%d, v=%f\n",
             position_.x,
             position_.y,

@@ -2,15 +2,20 @@
 
 #include <SDL3/SDL.h>
 
-#include "Agent.h"
-#include "AgentState.h"
 #include "../physics/Physics.h"
 #include "../sprites/Sprite.h"
+#include "Agent.h"
+#include "AgentState.h"
 
 class PlayerAgent : public Agent {
   public:
-    PlayerAgent(squirrel::Vector2f position, SpriteAnimationState animation_state,
-                Sprite* idle_sprite, Sprite* run_sprite, Physics& physics);
+    PlayerAgent(squirrel::Vector2f position,
+                SpriteAnimationState animation_state,
+                Sprite* idle_sprite,
+                Sprite* idle_shadow_sprite,
+                Sprite* run_sprite,
+                Sprite* run_shadow_sprite,
+                Physics& physics);
 
     void processInput(const SDL_Event& event);
     void update(const Timer& timer) override;
@@ -21,7 +26,9 @@ class PlayerAgent : public Agent {
 
     Physics& physics_;
     Sprite* idle_sprite_;
+    Sprite* idle_shadow_sprite_;
     Sprite* run_sprite_;
+    Sprite* run_shadow_sprite_;
 
     bool input_left_ = false;
     bool input_right_ = false;

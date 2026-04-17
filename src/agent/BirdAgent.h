@@ -1,7 +1,5 @@
 #pragma once
 
-#include <random>
-
 #include "../sprites/Sprite.h"
 #include "Agent.h"
 
@@ -15,5 +13,4 @@ class BirdAgent : public Agent {
 
   private:
     float elapsed_ = 0.0f;
-    std::mt19937 rng_{std::random_device{}()};
 };

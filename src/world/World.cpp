@@ -108,12 +108,26 @@ void World::initSprites() {
     fox_idle_sprite.addAnimation(SPRITE_ANIMATION_FACE_RIGHT, 3);
     sprites_.insert({WORLD_SPRITE_TYPE_FOX_IDLE, std::move(fox_idle_sprite)});
 
+    Sprite fox_idle_shadow_sprite(renderer_.loadTexture("fox_idle_shadow"), 32, 32);
+    fox_idle_shadow_sprite.addAnimation(SPRITE_ANIMATION_FACE_FRONT, 0);
+    fox_idle_shadow_sprite.addAnimation(SPRITE_ANIMATION_FACE_BACK, 1);
+    fox_idle_shadow_sprite.addAnimation(SPRITE_ANIMATION_FACE_LEFT, 2);
+    fox_idle_shadow_sprite.addAnimation(SPRITE_ANIMATION_FACE_RIGHT, 3);
+    sprites_.insert({WORLD_SPRITE_TYPE_FOX_IDLE_SHADOW, std::move(fox_idle_shadow_sprite)});
+
     Sprite fox_run_sprite(renderer_.loadTexture("fox_run"), 32, 32);
     fox_run_sprite.addAnimation(SPRITE_ANIMATION_FACE_FRONT, 0);
     fox_run_sprite.addAnimation(SPRITE_ANIMATION_FACE_BACK, 1);
     fox_run_sprite.addAnimation(SPRITE_ANIMATION_FACE_RIGHT, 2);
     fox_run_sprite.addAnimation(SPRITE_ANIMATION_FACE_LEFT, 3);
     sprites_.insert({WORLD_SPRITE_TYPE_FOX_RUN, std::move(fox_run_sprite)});
+
+    Sprite fox_run_shadow_sprite(renderer_.loadTexture("fox_run_shadow"), 32, 32);
+    fox_run_shadow_sprite.addAnimation(SPRITE_ANIMATION_FACE_FRONT, 0);
+    fox_run_shadow_sprite.addAnimation(SPRITE_ANIMATION_FACE_BACK, 1);
+    fox_run_shadow_sprite.addAnimation(SPRITE_ANIMATION_FACE_RIGHT, 2);
+    fox_run_shadow_sprite.addAnimation(SPRITE_ANIMATION_FACE_LEFT, 3);
+    sprites_.insert({WORLD_SPRITE_TYPE_FOX_RUN_SHADOW, std::move(fox_run_shadow_sprite)});
 
     Sprite bird_fly_sprite(renderer_.loadTexture("bird_fly"), 32, 32);
     bird_fly_sprite.addAnimation(SPRITE_ANIMATION_FACE_FRONT, 0);
@@ -131,7 +145,9 @@ void World::initAgents() {
         squirrel::Vector2f{(viewport_bounds_.right - 32.0f) / 2.0f, viewport_bounds_.bottom},
         SpriteAnimationState{.face = SPRITE_ANIMATION_FACE_FRONT, .fps = 4.0f},
         &sprites_.at(WORLD_SPRITE_TYPE_FOX_IDLE),
+        &sprites_.at(WORLD_SPRITE_TYPE_FOX_IDLE_SHADOW),
         &sprites_.at(WORLD_SPRITE_TYPE_FOX_RUN),
+        &sprites_.at(WORLD_SPRITE_TYPE_FOX_RUN_SHADOW),
         physics_);
     player_ = player.get();
     agents_.push_back(std::move(player));
