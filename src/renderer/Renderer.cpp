@@ -18,11 +18,8 @@ Renderer::Renderer(const std::shared_ptr<SDL_Renderer> renderer) : renderer_(ren
 }
 
 const squirrel::Texture* Renderer::loadTexture(const std::string& name) {
-    // I'm not using contains here because I want to avoid an extra lookup for textures already
-    // loaded.
-    auto existing_texture = textures_.find(name);
-    if (existing_texture != textures_.end()) {
-        return existing_texture->second.get();
+    if (auto texture = getLoadedTexture(name)) {
+        return texture;
     }
 
     std::string path = "assets/textures/" + name + ".png";
@@ -54,6 +51,17 @@ const squirrel::Texture* Renderer::loadTexture(const std::string& name) {
     auto [new_texture, inserted] = textures_.emplace(name, std::move(ptr));
     (void)inserted;
     return new_texture->second.get();
+}
+
+const squirrel::Texture* Renderer::getLoadedTexture(const std::string& name) const {
+    // I'm not using contains here because I want to avoid an extra lookup for textures already
+    // loaded.
+    auto existing_texture = textures_.find(name);
+    if (existing_texture != textures_.end()) {
+        return existing_texture->second.get();
+    }
+
+    throw std::runtime_error("[Renderer] " + name + " isn't a loaded texture.");
 }
 
 SDL_Color Renderer::getTextureColor(const std::string& name, const uint32_t x, const uint32_t y) {
@@ -96,7 +104,7 @@ void Renderer::endScene() const {
     SDL_RenderPresent(renderer_.get());
 }
 
-void Renderer::renderBackground(const squirrel::Background& background) {
+void Renderer::renderBackground(const squirrel::Background& background) const {
     SDL_SetRenderDrawColor(renderer_.get(),
                            background.sky_color.r,
                            background.sky_color.g,
@@ -104,9 +112,9 @@ void Renderer::renderBackground(const squirrel::Background& background) {
                            255 /* no opacity */);
     SDL_RenderClear(renderer_.get());
 
-    const squirrel::Texture* sky_texture = loadTexture(background.sky_texture_name);
-    const squirrel::Texture* ground_texture = loadTexture(background.ground_texture_name);
-    const squirrel::Texture* tree_texture = loadTexture(background.trees_texture_name);
+    const squirrel::Texture* sky_texture = getLoadedTexture(background.sky_texture_name);
+    const squirrel::Texture* ground_texture = getLoadedTexture(background.ground_texture_name);
+    const squirrel::Texture* tree_texture = getLoadedTexture(background.trees_texture_name);
 
     SDL_FRect sky_dst_rect = {
         // The sky offset is intended to give the illusion of a scrolling background. By negating
@@ -140,7 +148,7 @@ void Renderer::renderBackground(const squirrel::Background& background) {
         renderer_.get(), ground_texture->texture, nullptr, 1.0f, &ground_dst_rect);
 }
 
-void Renderer::render(const Agent& agent) {
+void Renderer::render(const Agent& agent) const {
     if (agent.getSprite() == nullptr) {
         return;
     }
@@ -161,7 +169,7 @@ void Renderer::render(const Agent& agent) {
 void Renderer::renderSprite(const Sprite& sprite,
                             const SpriteAnimationFace face,
                             const uint8_t frame_number,
-                            const SDL_FRect& dst_rect) {
+                            const SDL_FRect& dst_rect) const {
     SDL_FRect src_rect = {
         .x = static_cast<float>(frame_number * sprite.getFrameWidth()),
         .y = static_cast<float>(sprite.getOffsetIndex(face) * sprite.getFrameHeight()),

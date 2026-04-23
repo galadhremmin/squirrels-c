@@ -61,6 +61,7 @@ int GameApp::run() {
         timer.delta_time = (float)time_diff / 1000000000.0f;
 
         world.update(timer);
+        world.render();
 
         timer.current_time_ns = current_time_ns;
     }

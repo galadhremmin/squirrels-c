@@ -36,6 +36,7 @@ class World {
 
     void processInput(const SDL_Event& event);
     void update(const Timer& timer);
+    void render() const;
 
   private:
     void initSprites();

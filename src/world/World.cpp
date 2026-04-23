@@ -33,7 +33,9 @@ void World::update(const Timer& timer) {
     if (background_.sky_offset_x > renderer_.getViewportSize().w) {
         background_.sky_offset_x -= renderer_.getViewportSize().w;
     }
+}
 
+void World::render() const {
     renderer_.beginScene();
     renderer_.renderBackground(background_);
     for (const auto& agent : agents_) {
@@ -96,6 +98,10 @@ void World::initWorld() {
     background_.sky_texture_name = "sky";
     background_.sky_color = renderer_.getTextureColor("sky", 0, 323);
 
+    renderer_.loadTexture(background_.ground_texture_name);
+    renderer_.loadTexture(background_.trees_texture_name);
+    renderer_.loadTexture(background_.sky_texture_name);
+
     initSprites();
     initAgents();
 }
@@ -152,10 +158,12 @@ void World::initAgents() {
     player_ = player.get();
     agents_.push_back(std::move(player));
 
-    auto bird = std::make_unique<BirdAgent>(
-        squirrel::Vector2f{45, 45},
-        SpriteAnimationState{.face = SPRITE_ANIMATION_FACE_RIGHT, .fps = 8.0f},
-        &sprites_.at(WORLD_SPRITE_TYPE_BIRD_FLYING));
-    bird->reset(viewport_bounds_);
-    agents_.push_back(std::move(bird));
+    for (int i = 0; i < 2; i += 1) {
+        auto bird = std::make_unique<BirdAgent>(
+            squirrel::Vector2f{0, 0},
+            SpriteAnimationState{.face = SPRITE_ANIMATION_FACE_RIGHT, .fps = 8.0f},
+            &sprites_.at(WORLD_SPRITE_TYPE_BIRD_FLYING));
+        bird->reset(viewport_bounds_);
+        agents_.push_back(std::move(bird));
+    }
 }
