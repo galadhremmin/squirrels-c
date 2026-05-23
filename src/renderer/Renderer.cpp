@@ -18,7 +18,7 @@ Renderer::Renderer(const std::shared_ptr<SDL_Renderer> renderer) : renderer_(ren
 }
 
 const squirrel::Texture* Renderer::loadTexture(const std::string& name) {
-    if (auto texture = getLoadedTexture(name)) {
+    if (auto texture = getLoadedTextureUnchecked(name)) {
         return texture;
     }
 
@@ -54,6 +54,15 @@ const squirrel::Texture* Renderer::loadTexture(const std::string& name) {
 }
 
 const squirrel::Texture* Renderer::getLoadedTexture(const std::string& name) const {
+    auto texture = getLoadedTextureUnchecked(name);
+    if (texture == nullptr) {
+        throw std::runtime_error("[Renderer] " + name + " isn't a loaded texture.");
+    }
+
+    return texture;
+}
+
+const squirrel::Texture* Renderer::getLoadedTextureUnchecked(const std::string& name) const {
     // I'm not using contains here because I want to avoid an extra lookup for textures already
     // loaded.
     auto existing_texture = textures_.find(name);
@@ -61,7 +70,7 @@ const squirrel::Texture* Renderer::getLoadedTexture(const std::string& name) con
         return existing_texture->second.get();
     }
 
-    throw std::runtime_error("[Renderer] " + name + " isn't a loaded texture.");
+    return nullptr;
 }
 
 SDL_Color Renderer::getTextureColor(const std::string& name, const uint32_t x, const uint32_t y) {
@@ -116,14 +125,18 @@ void Renderer::renderBackground(const squirrel::Background& background) const {
     const squirrel::Texture* ground_texture = getLoadedTexture(background.ground_texture_name);
     const squirrel::Texture* tree_texture = getLoadedTexture(background.trees_texture_name);
 
+    const float vw = static_cast<float>(viewport_size_.w);
+    const float vh = static_cast<float>(viewport_size_.h);
+    const float sky_offset_px = background.sky_offset_x * vw;
+
     SDL_FRect sky_dst_rect = {
         // The sky offset is intended to give the illusion of a scrolling background. By negating
         // the offset, the tiling begins off-screen to the left. By adding to the offset to the
         // width, the tiling covers the entire viewport, while the negative offset gives the
-        // scrolling illusion..
-        .x = -background.sky_offset_x,
+        // scrolling illusion.
+        .x = -sky_offset_px,
         .y = 0.0f,
-        .w = static_cast<float>(viewport_size_.w) + background.sky_offset_x,
+        .w = vw + sky_offset_px,
         .h = sky_texture->height,
     };
     SDL_RenderTextureTiled(renderer_.get(), sky_texture->texture, nullptr, 1.0f, &sky_dst_rect);
@@ -131,8 +144,8 @@ void Renderer::renderBackground(const squirrel::Background& background) const {
     const float trees_offset_x = 0;
     SDL_FRect trees_dst_rect = {
         .x = -trees_offset_x,
-        .y = static_cast<float>(viewport_size_.h) - tree_texture->height * 1.1f,
-        .w = static_cast<float>(viewport_size_.w) + trees_offset_x,
+        .y = vh - tree_texture->height * 1.1f,
+        .w = vw + trees_offset_x,
         .h = tree_texture->height,
     };
     SDL_RenderTextureTiled(renderer_.get(), tree_texture->texture, nullptr, 1.0f, &trees_dst_rect);
@@ -140,8 +153,8 @@ void Renderer::renderBackground(const squirrel::Background& background) const {
     // The ground should be at the bottom of the viewport.
     SDL_FRect ground_dst_rect = {
         .x = 0.0f,
-        .y = static_cast<float>(viewport_size_.h) - ground_texture->height,
-        .w = static_cast<float>(viewport_size_.w),
+        .y = vh - ground_texture->height,
+        .w = vw,
         .h = ground_texture->height,
     };
     SDL_RenderTextureTiled(
@@ -153,11 +166,14 @@ void Renderer::render(const Agent& agent) const {
         return;
     }
 
+    const float vw = static_cast<float>(viewport_size_.w);
+    const float vh = static_cast<float>(viewport_size_.h);
+
     SDL_FRect dst_rect = {
-        .x = agent.getPosition().x,
-        .y = agent.getPosition().y,
-        .w = agent.getSize().w,
-        .h = agent.getSize().h,
+        .x = agent.getPosition().x * vw,
+        .y = agent.getPosition().y * vh,
+        .w = agent.getSize().w * vw,
+        .h = agent.getSize().h * vh,
     };
 
     renderSprite(*agent.getSprite(),

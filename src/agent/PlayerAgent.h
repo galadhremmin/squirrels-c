@@ -22,7 +22,7 @@ class PlayerAgent : public Agent {
     void onViewportBoundaryCollision(const ViewportBounds& bounds, uint8_t edges) override;
 
   private:
-    static constexpr float kMoveSpeed = 150.0f;
+    static constexpr float kMoveSpeed = 0.12f;  // normalized units/s  (≈ 150px/s at 1280p)
 
     Physics& physics_;
     Sprite* idle_sprite_;

@@ -53,5 +53,4 @@ class World {
     std::shared_ptr<SDL_Window> window_;
     PlayerAgent* player_ = nullptr;
     squirrel::Background background_;
-    float ground_y_;
 };

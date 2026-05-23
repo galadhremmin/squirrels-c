@@ -29,9 +29,9 @@ void World::update(const Timer& timer) {
     }
 
     // Scroll sky
-    background_.sky_offset_x += 5.0f * timer.delta_time;
-    if (background_.sky_offset_x > renderer_.getViewportSize().w) {
-        background_.sky_offset_x -= renderer_.getViewportSize().w;
+    background_.sky_offset_x += 0.004f * timer.delta_time;
+    if (background_.sky_offset_x > 1.0f) {
+        background_.sky_offset_x -= 1.0f;
     }
 }
 
@@ -51,7 +51,7 @@ void World::resolveViewportBoundary(Agent& agent) const {
     if (agent.getPosition().x < viewport_bounds_.left) {
         edges |= VIEWPORT_EDGE_LEFT;
 
-        if (agent.getPosition().x < viewport_bounds_.left - size.w - 1) {
+        if (agent.getPosition().x < viewport_bounds_.left - size.w) {
             edges |= VIEWPORT_OUTSIDE;
         }
     }
@@ -59,7 +59,7 @@ void World::resolveViewportBoundary(Agent& agent) const {
     if (agent.getPosition().x > viewport_bounds_.right - size.w) {
         edges |= VIEWPORT_EDGE_RIGHT;
 
-        if (agent.getPosition().x > viewport_bounds_.right + 1) {
+        if (agent.getPosition().x > viewport_bounds_.right) {
             edges |= VIEWPORT_OUTSIDE;
         }
     }
@@ -67,7 +67,7 @@ void World::resolveViewportBoundary(Agent& agent) const {
     if (agent.getPosition().y < viewport_bounds_.top) {
         edges |= VIEWPORT_EDGE_TOP;
 
-        if (agent.getPosition().y < viewport_bounds_.top - size.h - 1) {
+        if (agent.getPosition().y < viewport_bounds_.top - size.h) {
             edges |= VIEWPORT_OUTSIDE;
         }
     }
@@ -75,7 +75,7 @@ void World::resolveViewportBoundary(Agent& agent) const {
     if (agent.getPosition().y > viewport_bounds_.bottom) {
         edges |= VIEWPORT_EDGE_BOTTOM;
 
-        if (agent.getPosition().y > viewport_bounds_.bottom + size.h + 1) {
+        if (agent.getPosition().y > viewport_bounds_.bottom + size.h) {
             edges |= VIEWPORT_OUTSIDE;
         }
     }
@@ -90,8 +90,7 @@ void World::processInput(const SDL_Event& event) {
 }
 
 void World::initWorld() {
-    const SDL_Rect& vp = renderer_.getViewportSize();
-    viewport_bounds_ = {0.0f, 0.0f, static_cast<float>(vp.w), (vp.h - 64.0f * 1.5f)};
+    viewport_bounds_ = {0.0f, 0.0f, 1.0f, 0.85f};
 
     background_.ground_texture_name = "ground";
     background_.trees_texture_name = "trees";
@@ -148,7 +147,7 @@ void World::initAgents() {
     player_ = nullptr;
 
     auto player = std::make_unique<PlayerAgent>(
-        squirrel::Vector2f{(viewport_bounds_.right - 32.0f) / 2.0f, viewport_bounds_.bottom},
+        squirrel::Vector2f{(viewport_bounds_.right - 0.05f) / 2.0f, viewport_bounds_.bottom},
         SpriteAnimationState{.face = SPRITE_ANIMATION_FACE_FRONT, .fps = 4.0f},
         &sprites_.at(WORLD_SPRITE_TYPE_FOX_IDLE),
         &sprites_.at(WORLD_SPRITE_TYPE_FOX_IDLE_SHADOW),

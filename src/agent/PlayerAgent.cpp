@@ -7,7 +7,7 @@ PlayerAgent::PlayerAgent(squirrel::Vector2f position,
                          Sprite* run_sprite,
                          Sprite* run_shadow_sprite,
                          Physics& physics)
-    : Agent("player", position, squirrel::Sizef{.w = 64.0f, .h = 64.0f}, animation_state),
+    : Agent("player", position, squirrel::Sizef{.w = 0.05f, .h = 0.09f}, animation_state),
       physics_(physics), idle_sprite_(idle_sprite), idle_shadow_sprite_(idle_shadow_sprite),
       run_sprite_(run_sprite), run_shadow_sprite_(run_shadow_sprite) {
     setSprite(idle_shadow_sprite);

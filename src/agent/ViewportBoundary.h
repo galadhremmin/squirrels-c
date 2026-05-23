@@ -2,10 +2,10 @@
 #include <cstdint>
 
 struct ViewportBounds {
-    float left;   // always 0.0f
-    float top;    // always 0.0f
-    float right;  // viewport width
-    float bottom; // viewport height
+    float left;   // always 0.0f (normalized)
+    float top;    // always 0.0f (normalized)
+    float right;  // always 1.0f (normalized)
+    float bottom; // logical ground in normalized space (e.g. 0.85f)
 };
 
 enum ViewportEdge : uint8_t {

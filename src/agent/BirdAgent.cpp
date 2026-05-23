@@ -7,15 +7,15 @@
 BirdAgent::BirdAgent(squirrel::Vector2f position,
                      SpriteAnimationState animation_state,
                      Sprite* sprite)
-    : Agent("bird", position, squirrel::Sizef{.w = 64.0f, .h = 64.0f}, animation_state) {
+    : Agent("bird", position, squirrel::Sizef{.w = 0.05f, .h = 0.09f}, animation_state) {
     setSprite(sprite);
     setIsFlying(true);
 }
 
 static constexpr float kWaveFrequency = 1.5f;
-static constexpr float kWaveAmplitude = 40.0f;
-static constexpr float kVelocityMax = 300.0f;
-static constexpr float kVelocityMin = 120.0f;
+static constexpr float kWaveAmplitude = 0.06f;  // normalized  (≈ 40px at 720p)
+static constexpr float kVelocityMax = 0.23f;     // normalized  (≈ 300px/s at 1280p)
+static constexpr float kVelocityMin = 0.09f;     // normalized  (≈ 120px/s at 1280p)
 static constexpr float kYRangeMin = 0.1f;
 static constexpr float kYRangeMax = 0.7f;
 
@@ -34,8 +34,8 @@ void BirdAgent::update(const Timer& timer) {
 void BirdAgent::reset(const ViewportBounds& bounds) {
     auto& rng = squirrel::Random::instance();
 
-    const float y_min = std::fmax(bounds.top, bounds.bottom) * kYRangeMin - 1.0f;
-    const float y_max = std::fmax(bounds.top, bounds.bottom) * kYRangeMax + 1.0f;
+    const float y_min = bounds.bottom * kYRangeMin;
+    const float y_max = bounds.bottom * kYRangeMax;
 
     if (rng.coinFlip()) {
         // left
