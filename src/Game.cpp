@@ -3,8 +3,8 @@
 #include <stdexcept>
 
 #include "Game.h"
+#include "stages/GameStage.h"
 #include "utils/Timer.h"
-#include "world/World.h"
 
 GameApp::GameApp() : window_{}, renderer_{} {
 
@@ -28,7 +28,7 @@ GameApp::GameApp() : window_{}, renderer_{} {
 }
 
 int GameApp::run() {
-    World world(renderer_, window_);
+    GameStage world(renderer_, window_);
 
     Timer timer = {
         .current_time_ns = SDL_GetTicksNS(),

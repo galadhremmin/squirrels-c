@@ -3,9 +3,9 @@
 
 #include <memory>
 #include <unordered_map>
-#include <vector>
 
 #include "../agent/Agent.h"
+#include "../agent/AgentManager.h"
 #include "../physics/Physics.h"
 #include "../renderer/Background.h"
 #include "../renderer/Renderer.h"
@@ -23,16 +23,16 @@ typedef enum {
     WORLD_SPRITE_TYPE_COUNT,
 } WorldSpriteType;
 
-class World {
+class GameStage {
   public:
-    explicit World(const std::shared_ptr<SDL_Renderer>& renderer,
-                   const std::shared_ptr<SDL_Window>& window);
+    explicit GameStage(const std::shared_ptr<SDL_Renderer>& renderer,
+                       const std::shared_ptr<SDL_Window>& window);
 
     // Not copyable or movable
-    World(const World&) = delete;
-    World& operator=(const World&) = delete;
-    World(World&&) noexcept = delete;
-    World& operator=(World&&) noexcept = delete;
+    GameStage(const GameStage&) = delete;
+    GameStage& operator=(const GameStage&) = delete;
+    GameStage(GameStage&&) noexcept = delete;
+    GameStage& operator=(GameStage&&) noexcept = delete;
 
     void processInput(const SDL_Event& event);
     void update(const Timer& timer);
@@ -46,7 +46,7 @@ class World {
     void resolveViewportBoundary(Agent& agent) const;
 
     std::unordered_map<WorldSpriteType, Sprite> sprites_;
-    std::vector<std::unique_ptr<Agent>> agents_;
+    AgentManager agents_;
     Physics physics_;
     Renderer renderer_;
     ViewportBounds viewport_bounds_;

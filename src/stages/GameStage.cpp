@@ -4,10 +4,10 @@
 
 #include "../agent/BirdAgent.h"
 #include "../agent/PlayerAgent.h"
-#include "World.h"
+#include "GameStage.h"
 
-World::World(const std::shared_ptr<SDL_Renderer>& renderer,
-             const std::shared_ptr<SDL_Window>& window)
+GameStage::GameStage(const std::shared_ptr<SDL_Renderer>& renderer,
+                     const std::shared_ptr<SDL_Window>& window)
     : renderer_(renderer), window_(window) {
 
     int w, h;
@@ -17,7 +17,7 @@ World::World(const std::shared_ptr<SDL_Renderer>& renderer,
     initWorld();
 }
 
-void World::update(const Timer& timer) {
+void GameStage::update(const Timer& timer) {
     for (auto& agent : agents_) {
         agent->update(timer);
         physics_.update(*agent, timer);
@@ -28,6 +28,8 @@ void World::update(const Timer& timer) {
         agent->getSprite()->updateAnimationState(agent->getMutableAnimationState(), timer);
     }
 
+    agents_.flushDeferred();
+
     // Scroll sky
     background_.sky_offset_x += 0.004f * timer.delta_time;
     if (background_.sky_offset_x > 1.0f) {
@@ -35,7 +37,7 @@ void World::update(const Timer& timer) {
     }
 }
 
-void World::render() const {
+void GameStage::render() const {
     renderer_.beginScene();
     renderer_.renderBackground(background_);
     for (const auto& agent : agents_) {
@@ -44,7 +46,7 @@ void World::render() const {
     renderer_.endScene();
 }
 
-void World::resolveViewportBoundary(Agent& agent) const {
+void GameStage::resolveViewportBoundary(Agent& agent) const {
     auto size = agent.getSize();
 
     uint8_t edges = VIEWPORT_EDGE_NONE;
@@ -85,11 +87,11 @@ void World::resolveViewportBoundary(Agent& agent) const {
     }
 }
 
-void World::processInput(const SDL_Event& event) {
+void GameStage::processInput(const SDL_Event& event) {
     player_->processInput(event);
 }
 
-void World::initWorld() {
+void GameStage::initWorld() {
     viewport_bounds_ = {0.0f, 0.0f, 1.0f, 0.85f};
 
     background_.ground_texture_name = "ground";
@@ -105,7 +107,7 @@ void World::initWorld() {
     initAgents();
 }
 
-void World::initSprites() {
+void GameStage::initSprites() {
     Sprite fox_idle_sprite(renderer_.loadTexture("fox_idle"), 32, 32);
     fox_idle_sprite.addAnimation(SPRITE_ANIMATION_FACE_FRONT, 0);
     fox_idle_sprite.addAnimation(SPRITE_ANIMATION_FACE_BACK, 1);
@@ -142,8 +144,7 @@ void World::initSprites() {
     sprites_.insert({WORLD_SPRITE_TYPE_BIRD_FLYING, std::move(bird_fly_sprite)});
 }
 
-void World::initAgents() {
-    agents_.clear();
+void GameStage::initAgents() {
     player_ = nullptr;
 
     auto player = std::make_unique<PlayerAgent>(
@@ -155,7 +156,7 @@ void World::initAgents() {
         &sprites_.at(WORLD_SPRITE_TYPE_FOX_RUN_SHADOW),
         physics_);
     player_ = player.get();
-    agents_.push_back(std::move(player));
+    agents_.add(std::move(player));
 
     for (int i = 0; i < 2; i += 1) {
         auto bird = std::make_unique<BirdAgent>(
@@ -163,6 +164,6 @@ void World::initAgents() {
             SpriteAnimationState{.face = SPRITE_ANIMATION_FACE_RIGHT, .fps = 8.0f},
             &sprites_.at(WORLD_SPRITE_TYPE_BIRD_FLYING));
         bird->reset(viewport_bounds_);
-        agents_.push_back(std::move(bird));
+        agents_.add(std::move(bird));
     }
 }
