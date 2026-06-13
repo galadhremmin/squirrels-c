@@ -1,8 +1,8 @@
 #pragma once
 
-#include <stdint.h>
+#include <chrono>
 
-typedef struct {
-    uint64_t current_time_ns;
-    float delta_time;
-} Timer;
+struct Timer {
+    std::chrono::nanoseconds current_time;
+    float delta_time; // seconds
+};

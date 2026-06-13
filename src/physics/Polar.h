@@ -1,8 +1,10 @@
 #pragma once
 
 namespace squirrel {
-typedef struct {
+
+struct Polar2f {
     float magnitude;
     float direction_radians;
-} Polar2f;
+};
+
 } // namespace squirrel

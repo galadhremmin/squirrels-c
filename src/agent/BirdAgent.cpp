@@ -19,8 +19,8 @@ static constexpr float kVelocityMin = 0.09f;     // normalized  (≈ 120px/s at 
 static constexpr float kYRangeMin = 0.1f;
 static constexpr float kYRangeMax = 0.7f;
 
-void BirdAgent::onViewportBoundaryCollision(const ViewportBounds& bounds, uint8_t edges) {
-    if (edges & VIEWPORT_OUTSIDE) {
+void BirdAgent::onViewportBoundaryCollision(const ViewportBounds& bounds, ViewportEdge edges) {
+    if (edges & ViewportEdge::Outside) {
         reset(bounds);
     }
 }
@@ -41,18 +41,18 @@ void BirdAgent::reset(const ViewportBounds& bounds) {
         // left
         position_.x = -size_.w;
         velocity_.x = rng.range(kVelocityMin, kVelocityMax);
-        animation_state_.face = SPRITE_ANIMATION_FACE_RIGHT;
+        animation_state_.face = SpriteAnimationFace::Right;
     } else {
         // right
         position_.x = bounds.right;
         velocity_.x = -rng.range(kVelocityMin, kVelocityMax);
-        animation_state_.face = SPRITE_ANIMATION_FACE_LEFT;
+        animation_state_.face = SpriteAnimationFace::Left;
     }
 
     position_.y = rng.range(y_min, y_max);
     SDL_Log("[Bird] Reset position x=%f y=%f, face=%d, v=%f\n",
             position_.x,
             position_.y,
-            animation_state_.face,
+            static_cast<int>(animation_state_.face),
             velocity_.x);
 }

@@ -11,6 +11,6 @@ class GameApp {
     int run();
 
   private:
-    std::shared_ptr<SDL_Window> window_;
-    std::shared_ptr<SDL_Renderer> renderer_;
+    std::unique_ptr<SDL_Window, decltype(&SDL_DestroyWindow)> window_{nullptr, SDL_DestroyWindow};
+    std::unique_ptr<SDL_Renderer, decltype(&SDL_DestroyRenderer)> renderer_{nullptr, SDL_DestroyRenderer};
 };

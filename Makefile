@@ -9,11 +9,11 @@ CXX = g++
 
 # Compiler flags
 CFLAGS = -Wall -Wextra -std=c11 -O2
-CXXFLAGS = -Wall -Wextra -Wpedantic -std=c++23 -O2
+CXXFLAGS = -Wall -Wextra -Wpedantic -std=c++26 -O2
 
 # Debug flags (for development)
 DEBUG_CFLAGS = -Wall -Wextra -Wpedantic -std=c11 -g -O0 -DDEBUG
-DEBUG_CXXFLAGS = -Wall -Wextra -Wpedantic -std=c++23 -g -O0 -DDEBUG
+DEBUG_CXXFLAGS = -Wall -Wextra -Wpedantic -std=c++26 -g -O0 -DDEBUG
 SANITIZER_CFLAGS = $(DEBUG_CFLAGS) -fsanitize=address -fsanitize=undefined
 SANITIZER_CXXFLAGS = $(DEBUG_CXXFLAGS) -fsanitize=address -fsanitize=undefined
 

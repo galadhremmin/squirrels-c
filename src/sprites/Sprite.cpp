@@ -1,10 +1,10 @@
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <stdexcept>
 
-#include "../utils/Timer.h"
 #include "Sprite.h"
 
 Sprite::Sprite(const squirrel::Texture* frames_texture_ptr,
@@ -52,29 +52,26 @@ void Sprite::reset(const squirrel::Texture* frames_texture_ptr) {
     frames_texture_ptr_ = frames_texture_ptr;
 }
 
-void Sprite::addAnimation(const SpriteAnimationFace face, const uint8_t offset_index) {
-    offset_indices_by_animation_face_.insert({face, offset_index});
+void Sprite::addAnimation(SpriteAnimationFace face, uint8_t offset_index) {
+    offset_indices_[static_cast<size_t>(face)] = offset_index;
 }
 
-uint8_t Sprite::getOffsetIndex(const SpriteAnimationFace face) const {
-    if (offset_indices_by_animation_face_.find(face) == offset_indices_by_animation_face_.end()) {
-        throw std::runtime_error("Offset index not found for face");
-    }
-    return offset_indices_by_animation_face_.at(face);
+uint8_t Sprite::getOffsetIndex(SpriteAnimationFace face) const {
+    return offset_indices_[static_cast<size_t>(face)];
 }
 
 void Sprite::updateAnimationState(SpriteAnimationState& state, const Timer& timer) const {
-    float frame_duration_ms = 1000.0f / state.fps;
-    float elapsed_time_ms = (timer.current_time_ns - state.last_frame_time) / 1000000.0f;
+    auto frame_duration = std::chrono::duration<float>{1.0f / state.fps};
+    auto elapsed = timer.current_time - state.last_frame_time;
 
-    if (elapsed_time_ms >= frame_duration_ms) {
+    if (elapsed >= frame_duration) {
         state.frame_number = (state.frame_number + 1) % frame_count_;
-        state.last_frame_time = timer.current_time_ns;
+        state.last_frame_time = timer.current_time;
     }
 }
 
-void Sprite::resetAnimationState(SpriteAnimationState& state, const SpriteAnimationFace face) {
+void Sprite::resetAnimationState(SpriteAnimationState& state, SpriteAnimationFace face) {
     state.face = face;
     state.frame_number = 0;
-    state.last_frame_time = 0;
+    state.last_frame_time = {};
 }

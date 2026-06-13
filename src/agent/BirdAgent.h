@@ -9,7 +9,7 @@ class BirdAgent : public Agent {
 
     void update(const Timer& timer) override;
     void reset(const ViewportBounds& bounds);
-    void onViewportBoundaryCollision(const ViewportBounds& bounds, uint8_t edges) override;
+    void onViewportBoundaryCollision(const ViewportBounds& bounds, ViewportEdge edges) override;
 
   private:
     float elapsed_ = 0.0f;

@@ -6,8 +6,7 @@ void Physics::update(Agent& agent, const Timer& timer) const {
     if (!agent.is_flying_) {
         agent.velocity_.y += gravity_ * timer.delta_time;
     }
-    agent.position_.x += agent.velocity_.x * timer.delta_time;
-    agent.position_.y += agent.velocity_.y * timer.delta_time;
+    agent.position_ += agent.velocity_ * timer.delta_time;
 }
 
 void Physics::applyJumpImpulse(Agent& agent) const {

@@ -6,12 +6,11 @@
 #include "../agent/PlayerAgent.h"
 #include "GameStage.h"
 
-GameStage::GameStage(const std::shared_ptr<SDL_Renderer>& renderer,
-                     const std::shared_ptr<SDL_Window>& window)
+GameStage::GameStage(SDL_Renderer* renderer, SDL_Window* window)
     : renderer_(renderer), window_(window) {
 
     int w, h;
-    SDL_GetWindowSizeInPixels(window_.get(), &w, &h);
+    SDL_GetWindowSizeInPixels(window_, &w, &h);
     renderer_.setViewportSize(w, h);
 
     initWorld();
@@ -49,40 +48,40 @@ void GameStage::render() const {
 void GameStage::resolveViewportBoundary(Agent& agent) const {
     auto size = agent.getSize();
 
-    uint8_t edges = VIEWPORT_EDGE_NONE;
+    ViewportEdge edges = ViewportEdge::None;
     if (agent.getPosition().x < viewport_bounds_.left) {
-        edges |= VIEWPORT_EDGE_LEFT;
+        edges |= ViewportEdge::Left;
 
         if (agent.getPosition().x < viewport_bounds_.left - size.w) {
-            edges |= VIEWPORT_OUTSIDE;
+            edges |= ViewportEdge::Outside;
         }
     }
 
     if (agent.getPosition().x > viewport_bounds_.right - size.w) {
-        edges |= VIEWPORT_EDGE_RIGHT;
+        edges |= ViewportEdge::Right;
 
         if (agent.getPosition().x > viewport_bounds_.right) {
-            edges |= VIEWPORT_OUTSIDE;
+            edges |= ViewportEdge::Outside;
         }
     }
 
     if (agent.getPosition().y < viewport_bounds_.top) {
-        edges |= VIEWPORT_EDGE_TOP;
+        edges |= ViewportEdge::Top;
 
         if (agent.getPosition().y < viewport_bounds_.top - size.h) {
-            edges |= VIEWPORT_OUTSIDE;
+            edges |= ViewportEdge::Outside;
         }
     }
 
     if (agent.getPosition().y > viewport_bounds_.bottom) {
-        edges |= VIEWPORT_EDGE_BOTTOM;
+        edges |= ViewportEdge::Bottom;
 
         if (agent.getPosition().y > viewport_bounds_.bottom + size.h) {
-            edges |= VIEWPORT_OUTSIDE;
+            edges |= ViewportEdge::Outside;
         }
     }
 
-    if (edges != VIEWPORT_EDGE_NONE) {
+    if (edges != ViewportEdge::None) {
         agent.onViewportBoundaryCollision(viewport_bounds_, edges);
     }
 }
@@ -99,9 +98,9 @@ void GameStage::initWorld() {
     background_.sky_texture_name = "sky";
     background_.sky_color = renderer_.getTextureColor("sky", 0, 323);
 
-    renderer_.loadTexture(background_.ground_texture_name);
-    renderer_.loadTexture(background_.trees_texture_name);
-    renderer_.loadTexture(background_.sky_texture_name);
+    (void)renderer_.loadTexture(background_.ground_texture_name);
+    (void)renderer_.loadTexture(background_.trees_texture_name);
+    (void)renderer_.loadTexture(background_.sky_texture_name);
 
     initSprites();
     initAgents();
@@ -109,39 +108,39 @@ void GameStage::initWorld() {
 
 void GameStage::initSprites() {
     Sprite fox_idle_sprite(renderer_.loadTexture("fox_idle"), 32, 32);
-    fox_idle_sprite.addAnimation(SPRITE_ANIMATION_FACE_FRONT, 0);
-    fox_idle_sprite.addAnimation(SPRITE_ANIMATION_FACE_BACK, 1);
-    fox_idle_sprite.addAnimation(SPRITE_ANIMATION_FACE_LEFT, 2);
-    fox_idle_sprite.addAnimation(SPRITE_ANIMATION_FACE_RIGHT, 3);
-    sprites_.insert({WORLD_SPRITE_TYPE_FOX_IDLE, std::move(fox_idle_sprite)});
+    fox_idle_sprite.addAnimation(SpriteAnimationFace::Front, 0);
+    fox_idle_sprite.addAnimation(SpriteAnimationFace::Back, 1);
+    fox_idle_sprite.addAnimation(SpriteAnimationFace::Left, 2);
+    fox_idle_sprite.addAnimation(SpriteAnimationFace::Right, 3);
+    sprites_.insert({WorldSpriteType::FoxIdle, std::move(fox_idle_sprite)});
 
     Sprite fox_idle_shadow_sprite(renderer_.loadTexture("fox_idle_shadow"), 32, 32);
-    fox_idle_shadow_sprite.addAnimation(SPRITE_ANIMATION_FACE_FRONT, 0);
-    fox_idle_shadow_sprite.addAnimation(SPRITE_ANIMATION_FACE_BACK, 1);
-    fox_idle_shadow_sprite.addAnimation(SPRITE_ANIMATION_FACE_LEFT, 2);
-    fox_idle_shadow_sprite.addAnimation(SPRITE_ANIMATION_FACE_RIGHT, 3);
-    sprites_.insert({WORLD_SPRITE_TYPE_FOX_IDLE_SHADOW, std::move(fox_idle_shadow_sprite)});
+    fox_idle_shadow_sprite.addAnimation(SpriteAnimationFace::Front, 0);
+    fox_idle_shadow_sprite.addAnimation(SpriteAnimationFace::Back, 1);
+    fox_idle_shadow_sprite.addAnimation(SpriteAnimationFace::Left, 2);
+    fox_idle_shadow_sprite.addAnimation(SpriteAnimationFace::Right, 3);
+    sprites_.insert({WorldSpriteType::FoxIdleShadow, std::move(fox_idle_shadow_sprite)});
 
     Sprite fox_run_sprite(renderer_.loadTexture("fox_run"), 32, 32);
-    fox_run_sprite.addAnimation(SPRITE_ANIMATION_FACE_FRONT, 0);
-    fox_run_sprite.addAnimation(SPRITE_ANIMATION_FACE_BACK, 1);
-    fox_run_sprite.addAnimation(SPRITE_ANIMATION_FACE_RIGHT, 2);
-    fox_run_sprite.addAnimation(SPRITE_ANIMATION_FACE_LEFT, 3);
-    sprites_.insert({WORLD_SPRITE_TYPE_FOX_RUN, std::move(fox_run_sprite)});
+    fox_run_sprite.addAnimation(SpriteAnimationFace::Front, 0);
+    fox_run_sprite.addAnimation(SpriteAnimationFace::Back, 1);
+    fox_run_sprite.addAnimation(SpriteAnimationFace::Right, 2);
+    fox_run_sprite.addAnimation(SpriteAnimationFace::Left, 3);
+    sprites_.insert({WorldSpriteType::FoxRun, std::move(fox_run_sprite)});
 
     Sprite fox_run_shadow_sprite(renderer_.loadTexture("fox_run_shadow"), 32, 32);
-    fox_run_shadow_sprite.addAnimation(SPRITE_ANIMATION_FACE_FRONT, 0);
-    fox_run_shadow_sprite.addAnimation(SPRITE_ANIMATION_FACE_BACK, 1);
-    fox_run_shadow_sprite.addAnimation(SPRITE_ANIMATION_FACE_RIGHT, 2);
-    fox_run_shadow_sprite.addAnimation(SPRITE_ANIMATION_FACE_LEFT, 3);
-    sprites_.insert({WORLD_SPRITE_TYPE_FOX_RUN_SHADOW, std::move(fox_run_shadow_sprite)});
+    fox_run_shadow_sprite.addAnimation(SpriteAnimationFace::Front, 0);
+    fox_run_shadow_sprite.addAnimation(SpriteAnimationFace::Back, 1);
+    fox_run_shadow_sprite.addAnimation(SpriteAnimationFace::Right, 2);
+    fox_run_shadow_sprite.addAnimation(SpriteAnimationFace::Left, 3);
+    sprites_.insert({WorldSpriteType::FoxRunShadow, std::move(fox_run_shadow_sprite)});
 
     Sprite bird_fly_sprite(renderer_.loadTexture("bird_fly"), 32, 32);
-    bird_fly_sprite.addAnimation(SPRITE_ANIMATION_FACE_FRONT, 0);
-    bird_fly_sprite.addAnimation(SPRITE_ANIMATION_FACE_BACK, 1);
-    bird_fly_sprite.addAnimation(SPRITE_ANIMATION_FACE_LEFT, 2);
-    bird_fly_sprite.addAnimation(SPRITE_ANIMATION_FACE_RIGHT, 3);
-    sprites_.insert({WORLD_SPRITE_TYPE_BIRD_FLYING, std::move(bird_fly_sprite)});
+    bird_fly_sprite.addAnimation(SpriteAnimationFace::Front, 0);
+    bird_fly_sprite.addAnimation(SpriteAnimationFace::Back, 1);
+    bird_fly_sprite.addAnimation(SpriteAnimationFace::Left, 2);
+    bird_fly_sprite.addAnimation(SpriteAnimationFace::Right, 3);
+    sprites_.insert({WorldSpriteType::BirdFlying, std::move(bird_fly_sprite)});
 }
 
 void GameStage::initAgents() {
@@ -149,11 +148,11 @@ void GameStage::initAgents() {
 
     auto player = std::make_unique<PlayerAgent>(
         squirrel::Vector2f{(viewport_bounds_.right - 0.05f) / 2.0f, viewport_bounds_.bottom},
-        SpriteAnimationState{.face = SPRITE_ANIMATION_FACE_FRONT, .fps = 4.0f},
-        &sprites_.at(WORLD_SPRITE_TYPE_FOX_IDLE),
-        &sprites_.at(WORLD_SPRITE_TYPE_FOX_IDLE_SHADOW),
-        &sprites_.at(WORLD_SPRITE_TYPE_FOX_RUN),
-        &sprites_.at(WORLD_SPRITE_TYPE_FOX_RUN_SHADOW),
+        SpriteAnimationState{.face = SpriteAnimationFace::Front, .fps = 4.0f},
+        &sprites_.at(WorldSpriteType::FoxIdle),
+        &sprites_.at(WorldSpriteType::FoxIdleShadow),
+        &sprites_.at(WorldSpriteType::FoxRun),
+        &sprites_.at(WorldSpriteType::FoxRunShadow),
         physics_);
     player_ = player.get();
     agents_.add(std::move(player));
@@ -161,8 +160,8 @@ void GameStage::initAgents() {
     for (int i = 0; i < 2; i += 1) {
         auto bird = std::make_unique<BirdAgent>(
             squirrel::Vector2f{0, 0},
-            SpriteAnimationState{.face = SPRITE_ANIMATION_FACE_RIGHT, .fps = 8.0f},
-            &sprites_.at(WORLD_SPRITE_TYPE_BIRD_FLYING));
+            SpriteAnimationState{.face = SpriteAnimationFace::Right, .fps = 8.0f},
+            &sprites_.at(WorldSpriteType::BirdFlying));
         bird->reset(viewport_bounds_);
         agents_.add(std::move(bird));
     }

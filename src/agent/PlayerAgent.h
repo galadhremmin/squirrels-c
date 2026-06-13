@@ -19,7 +19,7 @@ class PlayerAgent : public Agent {
 
     void processInput(const SDL_Event& event);
     void update(const Timer& timer) override;
-    void onViewportBoundaryCollision(const ViewportBounds& bounds, uint8_t edges) override;
+    void onViewportBoundaryCollision(const ViewportBounds& bounds, ViewportEdge edges) override;
 
   private:
     static constexpr float kMoveSpeed = 0.12f;  // normalized units/s  (≈ 150px/s at 1280p)
@@ -34,6 +34,6 @@ class PlayerAgent : public Agent {
     bool input_right_ = false;
     bool input_jump_ = false;
 
-    AgentStateId prev_anim_state_ = AGENT_STATE_IDLE;
-    SpriteAnimationFace prev_face_ = SPRITE_ANIMATION_FACE_FRONT;
+    AgentStateId prev_anim_state_ = AgentStateId::Idle;
+    SpriteAnimationFace prev_face_ = SpriteAnimationFace::Front;
 };

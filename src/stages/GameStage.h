@@ -1,8 +1,7 @@
 #pragma once
-#include <SDL3/SDL.h>
 
-#include <memory>
-#include <unordered_map>
+#include <SDL3/SDL.h>
+#include <flat_map>
 
 #include "../agent/Agent.h"
 #include "../agent/AgentManager.h"
@@ -14,19 +13,18 @@
 
 class PlayerAgent;
 
-typedef enum {
-    WORLD_SPRITE_TYPE_FOX_IDLE,
-    WORLD_SPRITE_TYPE_FOX_IDLE_SHADOW,
-    WORLD_SPRITE_TYPE_FOX_RUN,
-    WORLD_SPRITE_TYPE_FOX_RUN_SHADOW,
-    WORLD_SPRITE_TYPE_BIRD_FLYING,
-    WORLD_SPRITE_TYPE_COUNT,
-} WorldSpriteType;
+enum class WorldSpriteType : uint8_t {
+    FoxIdle,
+    FoxIdleShadow,
+    FoxRun,
+    FoxRunShadow,
+    BirdFlying,
+    Count,
+};
 
 class GameStage {
   public:
-    explicit GameStage(const std::shared_ptr<SDL_Renderer>& renderer,
-                       const std::shared_ptr<SDL_Window>& window);
+    explicit GameStage(SDL_Renderer* renderer, SDL_Window* window);
 
     // Not copyable or movable
     GameStage(const GameStage&) = delete;
@@ -45,12 +43,12 @@ class GameStage {
 
     void resolveViewportBoundary(Agent& agent) const;
 
-    std::unordered_map<WorldSpriteType, Sprite> sprites_;
+    std::flat_map<WorldSpriteType, Sprite> sprites_;
     AgentManager agents_;
     Physics physics_;
     Renderer renderer_;
     ViewportBounds viewport_bounds_;
-    std::shared_ptr<SDL_Window> window_;
+    SDL_Window* window_;
     PlayerAgent* player_ = nullptr;
     squirrel::Background background_;
 };

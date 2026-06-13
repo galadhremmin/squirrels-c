@@ -37,27 +37,25 @@ void PlayerAgent::processInput(const SDL_Event& event) {
     }
 }
 
-void PlayerAgent::onViewportBoundaryCollision(const ViewportBounds& bounds, uint8_t edges) {
-    if (edges & VIEWPORT_EDGE_LEFT) {
+void PlayerAgent::onViewportBoundaryCollision(const ViewportBounds& bounds, ViewportEdge edges) {
+    if (edges & ViewportEdge::Left) {
         position_.x = bounds.left;
         if (velocity_.x < 0.0f)
             velocity_.x = 0.0f;
     }
-    if (edges & VIEWPORT_EDGE_RIGHT) {
+    if (edges & ViewportEdge::Right) {
         position_.x = bounds.right - size_.w;
         if (velocity_.x > 0.0f)
             velocity_.x = 0.0f;
     }
-    if (edges & VIEWPORT_EDGE_BOTTOM) {
+    if (edges & ViewportEdge::Bottom) {
         position_.y = bounds.bottom;
         velocity_.y = 0.0f;
         setIsGrounded(true);
     }
 }
 
-void PlayerAgent::update(const Timer& timer) {
-    (void)timer;
-
+void PlayerAgent::update([[maybe_unused]] const Timer& timer) {
     if (input_left_) {
         getMutableVelocity().x = -kMoveSpeed;
     } else if (input_right_) {
@@ -76,19 +74,19 @@ void PlayerAgent::update(const Timer& timer) {
     SpriteAnimationFace face;
 
     if (getVelocity().x < 0.0f) {
-        anim_state = AGENT_STATE_RUNNING;
-        face = SPRITE_ANIMATION_FACE_LEFT;
+        anim_state = AgentStateId::Running;
+        face = SpriteAnimationFace::Left;
     } else if (getVelocity().x > 0.0f) {
-        anim_state = AGENT_STATE_RUNNING;
-        face = SPRITE_ANIMATION_FACE_RIGHT;
+        anim_state = AgentStateId::Running;
+        face = SpriteAnimationFace::Right;
     } else {
-        anim_state = AGENT_STATE_IDLE;
-        face = SPRITE_ANIMATION_FACE_FRONT;
+        anim_state = AgentStateId::Idle;
+        face = SpriteAnimationFace::Front;
     }
 
     if (started_jumping || anim_state != prev_anim_state_ || face != prev_face_) {
         Sprite* next_sprite =
-            (anim_state == AGENT_STATE_RUNNING)
+            (anim_state == AgentStateId::Running)
                 ? ((is_grounded_ && !started_jumping) ? run_shadow_sprite_ : run_sprite_)
                 : ((is_grounded_ && !started_jumping) ? idle_shadow_sprite_ : idle_sprite_);
         if (getSprite() != next_sprite) {

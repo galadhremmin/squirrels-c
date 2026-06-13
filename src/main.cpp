@@ -1,6 +1,6 @@
-#include <cstdio>
 #include <exception>
 #include <format>
+#include <print>
 #include <stdexcept>
 
 #include "Game.h"
@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
 
         SDL_Quit();
     } catch (const std::exception& e) {
-        std::fprintf(stderr, "Fatal error: %s\n", e.what());
+        std::println(stderr, "Fatal error: {}", e.what());
         return_code = 1;
     }
 

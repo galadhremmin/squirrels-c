@@ -1,4 +1,5 @@
 #pragma once
+
 #include <cstdint>
 
 struct ViewportBounds {
@@ -8,11 +9,21 @@ struct ViewportBounds {
     float bottom; // logical ground in normalized space (e.g. 0.85f)
 };
 
-enum ViewportEdge : uint8_t {
-    VIEWPORT_EDGE_NONE = 0,
-    VIEWPORT_EDGE_LEFT = 1 << 0,
-    VIEWPORT_EDGE_RIGHT = 1 << 1,
-    VIEWPORT_EDGE_TOP = 1 << 2,
-    VIEWPORT_EDGE_BOTTOM = 1 << 3,
-    VIEWPORT_OUTSIDE = 1 << 4,
+enum class ViewportEdge : uint8_t {
+    None    = 0,
+    Left    = 1 << 0,
+    Right   = 1 << 1,
+    Top     = 1 << 2,
+    Bottom  = 1 << 3,
+    Outside = 1 << 4,
 };
+
+constexpr ViewportEdge operator|(ViewportEdge a, ViewportEdge b) noexcept {
+    return static_cast<ViewportEdge>(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
+}
+constexpr ViewportEdge& operator|=(ViewportEdge& a, ViewportEdge b) noexcept {
+    return a = a | b;
+}
+constexpr bool operator&(ViewportEdge a, ViewportEdge b) noexcept {
+    return static_cast<uint8_t>(a) & static_cast<uint8_t>(b);
+}

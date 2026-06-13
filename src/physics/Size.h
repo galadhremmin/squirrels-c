@@ -1,9 +1,10 @@
 #pragma once
 
 namespace squirrel {
-typedef struct {
+
+struct Sizef {
     float w;
     float h;
-} Sizef;
+};
 
 } // namespace squirrel

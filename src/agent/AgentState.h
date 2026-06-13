@@ -1,10 +1,11 @@
 #pragma once
 
-typedef enum {
-    AGENT_STATE_IDLE,
-    AGENT_STATE_RUNNING,
-    AGENT_STATE_AIRBORNE,
-    AGENT_STATE_DYING,
-    AGENT_STATE_DEAD,
-    AGENT_STATE_COUNT,
-} AgentStateId;
+#include <cstdint>
+
+enum class AgentStateId : uint8_t {
+    Idle,
+    Running,
+    Airborne,
+    Dying,
+    Dead,
+};

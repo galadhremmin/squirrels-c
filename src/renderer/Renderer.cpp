@@ -4,15 +4,16 @@
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_surface.h>
 #include <SDL3_image/SDL_image.h>
+#include <format>
 #include <stdexcept>
 
-Renderer::Renderer(const std::shared_ptr<SDL_Renderer> renderer) : renderer_(renderer) {
+Renderer::Renderer(SDL_Renderer* renderer) : renderer_(renderer) {
     if (renderer == nullptr) {
         throw std::runtime_error("Renderer must not be null");
     }
 
     const int enable_vsync = 1;
-    if (!SDL_SetRenderVSync(renderer_.get(), enable_vsync)) {
+    if (!SDL_SetRenderVSync(renderer_, enable_vsync)) {
         SDL_Log("VSync set to %d failed: %s", enable_vsync, SDL_GetError());
     }
 }
@@ -22,9 +23,9 @@ const squirrel::Texture* Renderer::loadTexture(const std::string& name) {
         return texture;
     }
 
-    std::string path = "assets/textures/" + name + ".png";
+    auto path = std::format("assets/textures/{}.png", name);
 
-    SDL_Texture* texture = IMG_LoadTexture(renderer_.get(), path.c_str());
+    SDL_Texture* texture = IMG_LoadTexture(renderer_, path.c_str());
     if (texture == nullptr) {
         SDL_Log("Failed to load texture: %s", path.c_str());
         throw std::runtime_error("Failed to load texture");
@@ -33,7 +34,7 @@ const squirrel::Texture* Renderer::loadTexture(const std::string& name) {
     float tex_w = 0, tex_h = 0;
     if (!SDL_GetTextureSize(texture, &tex_w, &tex_h)) {
         SDL_Log("Failed to query texture: %s", path.c_str());
-        throw std::runtime_error("Failed to query texture " + path);
+        throw std::runtime_error(std::format("Failed to query texture {}", path));
     }
 
     SDL_Log("Loaded texture %s named %s (%p)",
@@ -56,7 +57,7 @@ const squirrel::Texture* Renderer::loadTexture(const std::string& name) {
 const squirrel::Texture* Renderer::getLoadedTexture(const std::string& name) const {
     auto texture = getLoadedTextureUnchecked(name);
     if (texture == nullptr) {
-        throw std::runtime_error("[Renderer] " + name + " isn't a loaded texture.");
+        throw std::runtime_error(std::format("[Renderer] {} isn't a loaded texture.", name));
     }
 
     return texture;
@@ -76,7 +77,7 @@ const squirrel::Texture* Renderer::getLoadedTextureUnchecked(const std::string& 
 SDL_Color Renderer::getTextureColor(const std::string& name, const uint32_t x, const uint32_t y) {
     SDL_Color default_color{};
 
-    std::string path = "assets/textures/" + name + ".png";
+    auto path = std::format("assets/textures/{}.png", name);
     std::unique_ptr<SDL_Surface, decltype(&SDL_DestroySurface)> surface(IMG_Load(path.c_str()),
                                                                         SDL_DestroySurface);
     if (surface == nullptr) {
@@ -110,16 +111,16 @@ void Renderer::beginScene() const {
 }
 
 void Renderer::endScene() const {
-    SDL_RenderPresent(renderer_.get());
+    SDL_RenderPresent(renderer_);
 }
 
 void Renderer::renderBackground(const squirrel::Background& background) const {
-    SDL_SetRenderDrawColor(renderer_.get(),
+    SDL_SetRenderDrawColor(renderer_,
                            background.sky_color.r,
                            background.sky_color.g,
                            background.sky_color.b,
                            255 /* no opacity */);
-    SDL_RenderClear(renderer_.get());
+    SDL_RenderClear(renderer_);
 
     const squirrel::Texture* sky_texture = getLoadedTexture(background.sky_texture_name);
     const squirrel::Texture* ground_texture = getLoadedTexture(background.ground_texture_name);
@@ -139,7 +140,7 @@ void Renderer::renderBackground(const squirrel::Background& background) const {
         .w = vw + sky_offset_px,
         .h = sky_texture->height,
     };
-    SDL_RenderTextureTiled(renderer_.get(), sky_texture->texture, nullptr, 1.0f, &sky_dst_rect);
+    SDL_RenderTextureTiled(renderer_, sky_texture->texture, nullptr, 1.0f, &sky_dst_rect);
 
     const float trees_offset_x = 0;
     SDL_FRect trees_dst_rect = {
@@ -148,7 +149,7 @@ void Renderer::renderBackground(const squirrel::Background& background) const {
         .w = vw + trees_offset_x,
         .h = tree_texture->height,
     };
-    SDL_RenderTextureTiled(renderer_.get(), tree_texture->texture, nullptr, 1.0f, &trees_dst_rect);
+    SDL_RenderTextureTiled(renderer_, tree_texture->texture, nullptr, 1.0f, &trees_dst_rect);
 
     // The ground should be at the bottom of the viewport.
     SDL_FRect ground_dst_rect = {
@@ -157,8 +158,7 @@ void Renderer::renderBackground(const squirrel::Background& background) const {
         .w = vw,
         .h = ground_texture->height,
     };
-    SDL_RenderTextureTiled(
-        renderer_.get(), ground_texture->texture, nullptr, 1.0f, &ground_dst_rect);
+    SDL_RenderTextureTiled(renderer_, ground_texture->texture, nullptr, 1.0f, &ground_dst_rect);
 }
 
 void Renderer::render(const Agent& agent) const {
@@ -193,7 +193,7 @@ void Renderer::renderSprite(const Sprite& sprite,
         .h = static_cast<float>(sprite.getFrameHeight()),
     };
 
-    SDL_RenderTexture(renderer_.get(), sprite.getTexturePtr(), &src_rect, &dst_rect);
+    SDL_RenderTexture(renderer_, sprite.getTexturePtr(), &src_rect, &dst_rect);
 }
 
 void Renderer::freeLoadedTexture(squirrel::Texture* texture_ptr) {
