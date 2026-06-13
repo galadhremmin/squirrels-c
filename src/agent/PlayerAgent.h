@@ -15,14 +15,21 @@ class PlayerAgent : public Agent {
                 Sprite* idle_shadow_sprite,
                 Sprite* run_sprite,
                 Sprite* run_shadow_sprite,
-                Physics& physics);
+                Physics& physics)
+        : Agent("player", position, squirrel::Sizef{.w = 0.05f, .h = 0.09f}, animation_state),
+          physics_(physics), idle_sprite_(idle_sprite), idle_shadow_sprite_(idle_shadow_sprite),
+          run_sprite_(run_sprite), run_shadow_sprite_(run_shadow_sprite) {
+        setSprite(idle_shadow_sprite);
+    };
+
+    virtual ~PlayerAgent() = default;
 
     void processInput(const SDL_Event& event);
-    void update(const Timer& timer) override;
+    void update(const Timer& timer, AgentManager& manager) override;
     void onViewportBoundaryCollision(const ViewportBounds& bounds, ViewportEdge edges) override;
 
   private:
-    static constexpr float kMoveSpeed = 0.12f;  // normalized units/s  (≈ 150px/s at 1280p)
+    static constexpr float kMoveSpeed = 0.12f; // normalized units/s  (≈ 150px/s at 1280p)
 
     Physics& physics_;
     Sprite* idle_sprite_;

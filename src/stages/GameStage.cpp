@@ -18,7 +18,7 @@ GameStage::GameStage(SDL_Renderer* renderer, SDL_Window* window)
 
 void GameStage::update(const Timer& timer) {
     for (auto& agent : agents_) {
-        agent->update(timer);
+        agent->update(timer, agents_);
         physics_.update(*agent, timer);
 
         agent->setIsGrounded(false);
@@ -141,6 +141,9 @@ void GameStage::initSprites() {
     bird_fly_sprite.addAnimation(SpriteAnimationFace::Left, 2);
     bird_fly_sprite.addAnimation(SpriteAnimationFace::Right, 3);
     sprites_.insert({WorldSpriteType::BirdFlying, std::move(bird_fly_sprite)});
+
+    Sprite egg_sprite(renderer_.loadTexture("bird_egg"), 32, 32);
+    sprites_.insert({WorldSpriteType::Egg, std::move(egg_sprite)});
 }
 
 void GameStage::initAgents() {
@@ -161,7 +164,8 @@ void GameStage::initAgents() {
         auto bird = std::make_unique<BirdAgent>(
             squirrel::Vector2f{0, 0},
             SpriteAnimationState{.face = SpriteAnimationFace::Right, .fps = 8.0f},
-            &sprites_.at(WorldSpriteType::BirdFlying));
+            &sprites_.at(WorldSpriteType::BirdFlying),
+            &sprites_.at(WorldSpriteType::Egg));
         bird->reset(viewport_bounds_);
         agents_.add(std::move(bird));
     }

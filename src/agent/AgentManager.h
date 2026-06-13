@@ -9,6 +9,7 @@
 class AgentManager {
   public:
     void add(std::unique_ptr<Agent> agent);
+    void addDeferred(std::unique_ptr<Agent> agent);
     void removeDeferred(const Agent& agent);
     void flushDeferred();
 
@@ -27,5 +28,6 @@ class AgentManager {
 
   private:
     std::vector<std::unique_ptr<Agent>> agents_;
+    std::vector<std::unique_ptr<Agent>> agents_to_add_;
     std::unordered_set<const Agent*> agents_to_remove_;
 };

@@ -19,6 +19,7 @@ enum class WorldSpriteType : uint8_t {
     FoxRun,
     FoxRunShadow,
     BirdFlying,
+    Egg,
     Count,
 };
 

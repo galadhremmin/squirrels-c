@@ -8,33 +8,62 @@
 #include "../utils/Timer.h"
 #include "ViewportBoundary.h"
 
+class AgentManager;
+
 class Agent {
     friend class Physics;
 
   public:
     virtual ~Agent() = default;
 
-    virtual void update(const Timer& timer) = 0;
-    virtual void onViewportBoundaryCollision(const ViewportBounds& bounds, ViewportEdge edges) {
-        (void)bounds;
-        (void)edges;
+    virtual void update(const Timer& timer, AgentManager& manager) = 0;
+    virtual void onViewportBoundaryCollision([[maybe_unused]] const ViewportBounds& bounds,
+                                             [[maybe_unused]] ViewportEdge edges) {
     }
 
-    [[nodiscard]] const std::string& getName() const { return name_; }
-    [[nodiscard]] const Sprite* getSprite() const { return sprite_; }
-    [[nodiscard]] const squirrel::Sizef& getSize() const { return size_; }
-    [[nodiscard]] const squirrel::Vector2f& getPosition() const { return position_; }
-    [[nodiscard]] squirrel::Vector2f& getMutablePosition() { return position_; }
-    [[nodiscard]] const squirrel::Vector2f& getVelocity() const { return velocity_; }
-    [[nodiscard]] squirrel::Vector2f& getMutableVelocity() { return velocity_; }
-    [[nodiscard]] const SpriteAnimationState& getAnimationState() const { return animation_state_; }
-    [[nodiscard]] SpriteAnimationState& getMutableAnimationState() { return animation_state_; }
-    [[nodiscard]] bool getIsGrounded() const { return is_grounded_; }
-    [[nodiscard]] bool getIsFlying() const { return is_flying_; }
+    [[nodiscard]] const std::string& getName() const {
+        return name_;
+    }
+    [[nodiscard]] const Sprite* getSprite() const {
+        return sprite_;
+    }
+    [[nodiscard]] const squirrel::Sizef& getSize() const {
+        return size_;
+    }
+    [[nodiscard]] const squirrel::Vector2f& getPosition() const {
+        return position_;
+    }
+    [[nodiscard]] squirrel::Vector2f& getMutablePosition() {
+        return position_;
+    }
+    [[nodiscard]] const squirrel::Vector2f& getVelocity() const {
+        return velocity_;
+    }
+    [[nodiscard]] squirrel::Vector2f& getMutableVelocity() {
+        return velocity_;
+    }
+    [[nodiscard]] const SpriteAnimationState& getAnimationState() const {
+        return animation_state_;
+    }
+    [[nodiscard]] SpriteAnimationState& getMutableAnimationState() {
+        return animation_state_;
+    }
+    [[nodiscard]] bool getIsGrounded() const {
+        return is_grounded_;
+    }
+    [[nodiscard]] bool getIsFlying() const {
+        return is_flying_;
+    }
 
-    void setSprite(Sprite* const sprite) { sprite_ = sprite; }
-    void setIsGrounded(const bool grounded) { is_grounded_ = grounded; }
-    void setIsFlying(bool is_flying) { is_flying_ = is_flying; }
+    void setSprite(Sprite* const sprite) {
+        sprite_ = sprite;
+    }
+    void setIsGrounded(const bool grounded) {
+        is_grounded_ = grounded;
+    }
+    void setIsFlying(bool is_flying) {
+        is_flying_ = is_flying;
+    }
 
   protected:
     explicit Agent(std::string n,

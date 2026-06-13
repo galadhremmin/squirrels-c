@@ -1,18 +1,5 @@
 #include "PlayerAgent.h"
 
-PlayerAgent::PlayerAgent(squirrel::Vector2f position,
-                         SpriteAnimationState animation_state,
-                         Sprite* idle_sprite,
-                         Sprite* idle_shadow_sprite,
-                         Sprite* run_sprite,
-                         Sprite* run_shadow_sprite,
-                         Physics& physics)
-    : Agent("player", position, squirrel::Sizef{.w = 0.05f, .h = 0.09f}, animation_state),
-      physics_(physics), idle_sprite_(idle_sprite), idle_shadow_sprite_(idle_shadow_sprite),
-      run_sprite_(run_sprite), run_shadow_sprite_(run_shadow_sprite) {
-    setSprite(idle_shadow_sprite);
-}
-
 void PlayerAgent::processInput(const SDL_Event& event) {
     const bool keydown = (event.type == SDL_EVENT_KEY_DOWN);
     const bool keyup = (event.type == SDL_EVENT_KEY_UP);
@@ -55,7 +42,8 @@ void PlayerAgent::onViewportBoundaryCollision(const ViewportBounds& bounds, View
     }
 }
 
-void PlayerAgent::update([[maybe_unused]] const Timer& timer) {
+void PlayerAgent::update([[maybe_unused]] const Timer& timer,
+                         [[maybe_unused]] AgentManager& manager) {
     if (input_left_) {
         getMutableVelocity().x = -kMoveSpeed;
     } else if (input_right_) {

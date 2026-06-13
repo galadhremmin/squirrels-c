@@ -1,21 +1,16 @@
 #include "BirdAgent.h"
+
 #include <cmath>
 #include <numbers>
 
 #include "../utils/Random.h"
-
-BirdAgent::BirdAgent(squirrel::Vector2f position,
-                     SpriteAnimationState animation_state,
-                     Sprite* sprite)
-    : Agent("bird", position, squirrel::Sizef{.w = 0.05f, .h = 0.09f}, animation_state) {
-    setSprite(sprite);
-    setIsFlying(true);
-}
+#include "AgentManager.h"
+#include "EggAgent.h"
 
 static constexpr float kWaveFrequency = 1.5f;
-static constexpr float kWaveAmplitude = 0.06f;  // normalized  (≈ 40px at 720p)
-static constexpr float kVelocityMax = 0.23f;     // normalized  (≈ 300px/s at 1280p)
-static constexpr float kVelocityMin = 0.09f;     // normalized  (≈ 120px/s at 1280p)
+static constexpr float kWaveAmplitude = 0.06f; // normalized  (≈ 40px at 720p)
+static constexpr float kVelocityMax = 0.23f;   // normalized  (≈ 300px/s at 1280p)
+static constexpr float kVelocityMin = 0.09f;   // normalized  (≈ 120px/s at 1280p)
 static constexpr float kYRangeMin = 0.1f;
 static constexpr float kYRangeMax = 0.7f;
 
@@ -25,10 +20,16 @@ void BirdAgent::onViewportBoundaryCollision(const ViewportBounds& bounds, Viewpo
     }
 }
 
-void BirdAgent::update(const Timer& timer) {
+void BirdAgent::update(const Timer& timer, AgentManager& manager) {
     elapsed_ += timer.delta_time;
     velocity_.y =
         std::sinf(elapsed_ * kWaveFrequency * 2.0f * std::numbers::pi_v<float>) * kWaveAmplitude;
+
+    if (timer.current_time - last_egg_spawned_at_ > std::chrono::seconds(3)) {
+        auto egg = std::make_unique<EggAgent>(position_, egg_sprite_, timer);
+        manager.addDeferred(std::move(egg));
+        last_egg_spawned_at_ = timer.current_time;
+    }
 }
 
 void BirdAgent::reset(const ViewportBounds& bounds) {

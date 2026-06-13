@@ -1,42 +1,42 @@
 [
   {
     "directory": "/home/leonard/Documents/Github/squirrels-c",
-    "command": "g++ -std=c++23 -Wall -Wextra -Wpedantic -c src/agent/BirdAgent.cpp -o bin/BirdAgent.o",
+    "command": "g++ -std=c++26 -Wall -Wextra -Wpedantic -c src/agent/BirdAgent.cpp -o bin/BirdAgent.o",
     "file": "/home/leonard/Documents/Github/squirrels-c/src/agent/BirdAgent.cpp"
   },
   {
     "directory": "/home/leonard/Documents/Github/squirrels-c",
-    "command": "g++ -std=c++23 -Wall -Wextra -Wpedantic -c src/agent/PlayerAgent.cpp -o bin/PlayerAgent.o",
+    "command": "g++ -std=c++26 -Wall -Wextra -Wpedantic -c src/agent/PlayerAgent.cpp -o bin/PlayerAgent.o",
     "file": "/home/leonard/Documents/Github/squirrels-c/src/agent/PlayerAgent.cpp"
   },
   {
     "directory": "/home/leonard/Documents/Github/squirrels-c",
-    "command": "g++ -std=c++23 -Wall -Wextra -Wpedantic -c src/Game.cpp -o bin/Game.o",
+    "command": "g++ -std=c++26 -Wall -Wextra -Wpedantic -c src/Game.cpp -o bin/Game.o",
     "file": "/home/leonard/Documents/Github/squirrels-c/src/Game.cpp"
   },
   {
     "directory": "/home/leonard/Documents/Github/squirrels-c",
-    "command": "g++ -std=c++23 -Wall -Wextra -Wpedantic -c src/main.cpp -o bin/main.o",
+    "command": "g++ -std=c++26 -Wall -Wextra -Wpedantic -c src/main.cpp -o bin/main.o",
     "file": "/home/leonard/Documents/Github/squirrels-c/src/main.cpp"
   },
   {
     "directory": "/home/leonard/Documents/Github/squirrels-c",
-    "command": "g++ -std=c++23 -Wall -Wextra -Wpedantic -c src/physics/Physics.cpp -o bin/Physics.o",
+    "command": "g++ -std=c++26 -Wall -Wextra -Wpedantic -c src/physics/Physics.cpp -o bin/Physics.o",
     "file": "/home/leonard/Documents/Github/squirrels-c/src/physics/Physics.cpp"
   },
   {
     "directory": "/home/leonard/Documents/Github/squirrels-c",
-    "command": "g++ -std=c++23 -Wall -Wextra -Wpedantic -c src/renderer/Renderer.cpp -o bin/Renderer.o",
+    "command": "g++ -std=c++26 -Wall -Wextra -Wpedantic -c src/renderer/Renderer.cpp -o bin/Renderer.o",
     "file": "/home/leonard/Documents/Github/squirrels-c/src/renderer/Renderer.cpp"
   },
   {
     "directory": "/home/leonard/Documents/Github/squirrels-c",
-    "command": "g++ -std=c++23 -Wall -Wextra -Wpedantic -c src/sprites/Sprite.cpp -o bin/Sprite.o",
+    "command": "g++ -std=c++26 -Wall -Wextra -Wpedantic -c src/sprites/Sprite.cpp -o bin/Sprite.o",
     "file": "/home/leonard/Documents/Github/squirrels-c/src/sprites/Sprite.cpp"
   },
   {
     "directory": "/home/leonard/Documents/Github/squirrels-c",
-    "command": "g++ -std=c++23 -Wall -Wextra -Wpedantic -c src/world/World.cpp -o bin/World.o",
+    "command": "g++ -std=c++26 -Wall -Wextra -Wpedantic -c src/world/World.cpp -o bin/World.o",
     "file": "/home/leonard/Documents/Github/squirrels-c/src/world/World.cpp"
   }
 ]
