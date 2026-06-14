@@ -25,6 +25,8 @@ void PlayerAgent::processInput(const SDL_Event& event) {
 }
 
 void PlayerAgent::onViewportBoundaryCollision(const ViewportBounds& bounds, ViewportEdge edges) {
+    Agent::onViewportBoundaryCollision(bounds, edges);
+
     if (edges & ViewportEdge::Left) {
         position_.x = bounds.left;
         if (velocity_.x < 0.0f)
@@ -34,11 +36,6 @@ void PlayerAgent::onViewportBoundaryCollision(const ViewportBounds& bounds, View
         position_.x = bounds.right - size_.w;
         if (velocity_.x > 0.0f)
             velocity_.x = 0.0f;
-    }
-    if (edges & ViewportEdge::Bottom) {
-        position_.y = bounds.bottom;
-        velocity_.y = 0.0f;
-        setIsGrounded(true);
     }
 }
 

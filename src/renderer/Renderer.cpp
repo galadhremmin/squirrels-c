@@ -180,6 +180,9 @@ void Renderer::render(const Agent& agent) const {
                  agent.getAnimationState().face,
                  agent.getAnimationState().frame_number,
                  dst_rect);
+
+    SDL_SetRenderDrawColor(renderer_, 255, 0, 0, 0);
+    SDL_RenderRect(renderer_, &dst_rect);
 }
 
 void Renderer::renderSprite(const Sprite& sprite,

@@ -17,9 +17,7 @@ class Agent {
     virtual ~Agent() = default;
 
     virtual void update(const Timer& timer, AgentManager& manager) = 0;
-    virtual void onViewportBoundaryCollision([[maybe_unused]] const ViewportBounds& bounds,
-                                             [[maybe_unused]] ViewportEdge edges) {
-    }
+    virtual void onViewportBoundaryCollision(const ViewportBounds& bounds, ViewportEdge edges);
 
     [[nodiscard]] const std::string& getName() const {
         return name_;

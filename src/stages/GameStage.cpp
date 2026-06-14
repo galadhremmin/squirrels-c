@@ -73,10 +73,10 @@ void GameStage::resolveViewportBoundary(Agent& agent) const {
         }
     }
 
-    if (agent.getPosition().y > viewport_bounds_.bottom) {
+    if (agent.getPosition().y + size.h > viewport_bounds_.bottom) {
         edges |= ViewportEdge::Bottom;
 
-        if (agent.getPosition().y > viewport_bounds_.bottom + size.h) {
+        if (agent.getPosition().y > viewport_bounds_.bottom) {
             edges |= ViewportEdge::Outside;
         }
     }
@@ -91,7 +91,7 @@ void GameStage::processInput(const SDL_Event& event) {
 }
 
 void GameStage::initWorld() {
-    viewport_bounds_ = {0.0f, 0.0f, 1.0f, 0.85f};
+    viewport_bounds_ = {0.0f, 0.0f, 1.0f, 0.95f};
 
     background_.ground_texture_name = "ground";
     background_.trees_texture_name = "trees";
@@ -150,7 +150,7 @@ void GameStage::initAgents() {
     player_ = nullptr;
 
     auto player = std::make_unique<PlayerAgent>(
-        squirrel::Vector2f{(viewport_bounds_.right - 0.05f) / 2.0f, viewport_bounds_.bottom},
+        squirrel::Vector2f{(viewport_bounds_.right - 0.05f) / 2.0f, 0.5f},
         SpriteAnimationState{.face = SpriteAnimationFace::Front, .fps = 4.0f},
         &sprites_.at(WorldSpriteType::FoxIdle),
         &sprites_.at(WorldSpriteType::FoxIdleShadow),
