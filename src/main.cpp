@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
             throw std::runtime_error(std::format("Failed to initialize SDL: {}", SDL_GetError()));
         }
 
-        SDL_Log("[Random] Seed %lu\n", squirrel::Random::instance().seed());
+        SDL_Log("[Random] Seed %llu\n", squirrel::Random::instance().seed());
 
         GameApp app{};
         return_code = app.run();

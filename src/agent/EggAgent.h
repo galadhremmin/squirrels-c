@@ -1,7 +1,6 @@
 #pragma once
 
 #include <SDL3/SDL.h>
-#include <print>
 
 #include "../sprites/Sprite.h"
 #include "../utils/Random.h"
@@ -22,6 +21,5 @@ class EggAgent : public Agent {
     void update(const Timer& timer, AgentManager& manager) override;
 
   private:
-    Sprite* egg_sprite_;
     const std::chrono::nanoseconds ttl_;
 };
