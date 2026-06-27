@@ -20,9 +20,16 @@ void GameStage::update(const Timer& timer) {
     for (auto& agent : agents_) {
         agent->update(timer, agents_);
         physics_.update(*agent, timer);
+        collision_map_.update(*agent);
 
         agent->setIsGrounded(false);
+
         resolveViewportBoundary(*agent);
+        for (auto& collision_agent : collision_map_.getAdjacentAgents(*agent)) {
+            if (collision_agent != &*agent) {
+                agent->onAgentCollision(*collision_agent);
+            }
+        }
 
         agent->getSprite()->updateAnimationState(agent->getMutableAnimationState(), timer);
     }

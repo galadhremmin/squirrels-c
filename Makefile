@@ -8,12 +8,12 @@ CC = gcc
 CXX = g++
 
 # Compiler flags
-CFLAGS = -Wall -Wextra -std=c11 -O2
-CXXFLAGS = -Wall -Wextra -Wpedantic -std=c++26 -O2
+CFLAGS = -Wall -Wextra -std=c11 -O2 -MMD -MP
+CXXFLAGS = -Wall -Wextra -Wpedantic -std=c++26 -O2 -MMD -MP
 
 # Debug flags (for development)
-DEBUG_CFLAGS = -Wall -Wextra -Wpedantic -std=c11 -g -O0 -DDEBUG
-DEBUG_CXXFLAGS = -Wall -Wextra -Wpedantic -std=c++26 -g -O0 -DDEBUG
+DEBUG_CFLAGS = -Wall -Wextra -Wpedantic -std=c11 -g -O0 -DDEBUG -MMD -MP
+DEBUG_CXXFLAGS = -Wall -Wextra -Wpedantic -std=c++26 -g -O0 -DDEBUG -MMD -MP
 SANITIZER_CFLAGS = $(DEBUG_CFLAGS) -fsanitize=address -fsanitize=undefined
 SANITIZER_CXXFLAGS = $(DEBUG_CXXFLAGS) -fsanitize=address -fsanitize=undefined
 
@@ -47,6 +47,7 @@ SOURCES = $(SOURCES_C) $(SOURCES_CPP)
 OBJECTS_C = $(foreach src,$(SOURCES_C),$(BINDIR)/$(notdir $(src:.c=.o)))
 OBJECTS_CPP = $(foreach src,$(SOURCES_CPP),$(BINDIR)/$(notdir $(src:.cpp=.o)))
 OBJECTS = $(OBJECTS_C) $(OBJECTS_CPP)
+DEPS = $(OBJECTS:.o=.d)
 
 # Default target
 all: $(BINDIR)/$(TARGET)
@@ -146,3 +147,5 @@ check-lines:
 
 # Phony targets
 .PHONY: all clean install-deps check-deps check-pkg-config run debug sanitize valgrind check format
+
+-include $(DEPS)

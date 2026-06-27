@@ -1,4 +1,5 @@
 #include "PlayerAgent.h"
+#include <print>
 
 void PlayerAgent::processInput(const SDL_Event& event) {
     const bool keydown = (event.type == SDL_EVENT_KEY_DOWN);
@@ -37,6 +38,10 @@ void PlayerAgent::onViewportBoundaryCollision(const ViewportBounds& bounds, View
         if (velocity_.x > 0.0f)
             velocity_.x = 0.0f;
     }
+}
+
+void PlayerAgent::onAgentCollision(const Agent& agent) {
+    std::println("Collision with {}", agent.getName());
 }
 
 void PlayerAgent::update([[maybe_unused]] const Timer& timer,

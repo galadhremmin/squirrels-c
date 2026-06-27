@@ -7,3 +7,6 @@ void Agent::onViewportBoundaryCollision(const ViewportBounds& bounds, ViewportEd
         is_grounded_ = true;
     }
 }
+
+void Agent::onAgentCollision([[maybe_unused]] const Agent& agent) {
+}
