@@ -1,2 +1,7 @@
 CompileFlags:
+  # macOS: use Homebrew GCC's libstdc++ (ships C++26 <inplace_vector>); Apple
+  # Clang's libc++ does not. clangd queries this driver for its system include
+  # paths (whitelisted via --query-driver in .claude/settings.json). On Linux
+  # this override is harmless — the path won't exist and clangd falls back.
+  Compiler: /opt/homebrew/bin/g++-16
   Add: [-std=c++26, -I/opt/homebrew/include, -I/usr/include]

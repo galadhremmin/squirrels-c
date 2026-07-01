@@ -4,8 +4,16 @@
 UNAME_S := $(shell uname -s)
 
 # Compilers
-CC = gcc
-CXX = g++
+# On macOS, `g++`/`gcc` are aliases for Apple Clang, whose libc++ does not ship
+# <inplace_vector> (C++26). Use Homebrew GCC (libstdc++) instead, matching the
+# Fedora target. Override on the command line with `make CXX=... CC=...`.
+ifeq ($(UNAME_S),Darwin)
+    CC = $(firstword $(wildcard /opt/homebrew/bin/gcc-16 /usr/local/bin/gcc-16) gcc)
+    CXX = $(firstword $(wildcard /opt/homebrew/bin/g++-16 /usr/local/bin/g++-16) g++)
+else
+    CC = gcc
+    CXX = g++
+endif
 
 # Compiler flags
 CFLAGS = -Wall -Wextra -std=c11 -O2 -MMD -MP
