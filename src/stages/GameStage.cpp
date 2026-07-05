@@ -26,15 +26,15 @@ void GameStage::update(const Timer& timer) {
 
         resolveViewportBoundary(*agent);
         for (auto& collision_agent : collision_map_.getAdjacentAgents(*agent)) {
-            if (collision_agent != &*agent) {
-                agent->onAgentCollision(*collision_agent);
+            if (collision_agent != nullptr && collision_agent != &*agent) {
+                agent->onAgentCollision(*collision_agent, agents_);
             }
         }
 
         agent->getSprite()->updateAnimationState(agent->getMutableAnimationState(), timer);
     }
 
-    agents_.flushDeferred();
+    agents_.flushDeferred([&](Agent& agent) { collision_map_.remove(agent); });
 
     // Scroll sky
     background_.sky_offset_x += 0.004f * timer.delta_time;

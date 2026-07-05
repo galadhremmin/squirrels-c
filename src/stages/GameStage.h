@@ -5,7 +5,7 @@
 
 #include "../agent/Agent.h"
 #include "../agent/AgentManager.h"
-#include "../physics/CollisionMap.h"
+#include "../physics/CollisionZone.h"
 #include "../physics/Physics.h"
 #include "../renderer/Background.h"
 #include "../renderer/Renderer.h"
@@ -51,7 +51,7 @@ class GameStage {
     std::flat_map<WorldSpriteType, Sprite> sprites_;
     AgentManager agents_;
     Physics physics_;
-    CollisionMap collision_map_{kCollisionGridRows, kCollisionGridColumns};
+    CollisionZone collision_map_{kCollisionGridRows, kCollisionGridColumns};
     Renderer renderer_;
     ViewportBounds viewport_bounds_;
     SDL_Window* window_;

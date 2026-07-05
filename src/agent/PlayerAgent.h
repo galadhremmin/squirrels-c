@@ -27,7 +27,7 @@ class PlayerAgent : public Agent {
     void processInput(const SDL_Event& event);
     void update(const Timer& timer, AgentManager& manager) override;
     void onViewportBoundaryCollision(const ViewportBounds& bounds, ViewportEdge edges) override;
-    void onAgentCollision(const Agent& agent) override;
+    void onAgentCollision(Agent& agent, AgentManager& manager) override;
 
   private:
     static constexpr float kMoveSpeed = 0.12f; // normalized units/s  (≈ 150px/s at 1280p)

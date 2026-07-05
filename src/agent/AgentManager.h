@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <unordered_set>
 #include <vector>
@@ -10,8 +11,8 @@ class AgentManager {
   public:
     void add(std::unique_ptr<Agent> agent);
     void addDeferred(std::unique_ptr<Agent> agent);
-    void removeDeferred(const Agent& agent);
-    void flushDeferred();
+    void removeDeferred(Agent& agent);
+    void flushDeferred(std::function<void(Agent&)> deallocator = nullptr);
 
     auto begin() {
         return agents_.begin();
@@ -29,5 +30,5 @@ class AgentManager {
   private:
     std::vector<std::unique_ptr<Agent>> agents_;
     std::vector<std::unique_ptr<Agent>> agents_to_add_;
-    std::unordered_set<const Agent*> agents_to_remove_;
+    std::unordered_set<Agent*> agents_to_remove_;
 };

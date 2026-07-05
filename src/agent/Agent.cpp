@@ -8,5 +8,6 @@ void Agent::onViewportBoundaryCollision(const ViewportBounds& bounds, ViewportEd
     }
 }
 
-void Agent::onAgentCollision([[maybe_unused]] const Agent& agent) {
+void Agent::onAgentCollision([[maybe_unused]] Agent& agent,
+                             [[maybe_unused]] AgentManager& manager) {
 }

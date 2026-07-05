@@ -1,5 +1,6 @@
 #include "AgentManager.h"
 #include "Agent.h"
+#include <functional>
 #include <iterator>
 
 void AgentManager::add(std::unique_ptr<Agent> agent) {
@@ -10,11 +11,17 @@ void AgentManager::addDeferred(std::unique_ptr<Agent> agent) {
     agents_to_add_.push_back(std::move(agent));
 }
 
-void AgentManager::removeDeferred(const Agent& agent) {
+void AgentManager::removeDeferred(Agent& agent) {
     agents_to_remove_.insert(&agent);
 }
 
-void AgentManager::flushDeferred() {
+void AgentManager::flushDeferred(std::function<void(Agent&)> deallocator) {
+    if (deallocator != nullptr) {
+        for (auto& agent : agents_to_remove_) {
+            deallocator(*agent);
+        }
+    }
+
     std::erase_if(agents_, [&](const auto& ptr) { return agents_to_remove_.contains(ptr.get()); });
     agents_to_remove_.clear();
 

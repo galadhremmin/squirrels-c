@@ -1,4 +1,5 @@
 #include "PlayerAgent.h"
+#include "AgentManager.h"
 #include <print>
 
 void PlayerAgent::processInput(const SDL_Event& event) {
@@ -40,8 +41,11 @@ void PlayerAgent::onViewportBoundaryCollision(const ViewportBounds& bounds, View
     }
 }
 
-void PlayerAgent::onAgentCollision(const Agent& agent) {
-    std::println("Collision with {}", agent.getName());
+void PlayerAgent::onAgentCollision(Agent& agent, AgentManager& manager) {
+    if (agent.getName() == "egg") {
+        manager.removeDeferred(agent);
+        std::println("Caught egg {}!", reinterpret_cast<void*>(&agent));
+    }
 }
 
 void PlayerAgent::update([[maybe_unused]] const Timer& timer,
