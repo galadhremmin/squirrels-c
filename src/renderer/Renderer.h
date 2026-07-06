@@ -30,6 +30,10 @@ class Renderer {
     void render(const Agent& agent) const;
     void renderBackground(const squirrel::Background& background) const;
 
+    inline void setRenderBoundaryBoxes(bool b) {
+        render_boundary_boxes_ = b;
+    }
+
   private:
     void renderSprite(const Sprite& sprite,
                       SpriteAnimationFace face,
@@ -44,4 +48,6 @@ class Renderer {
                        std::unique_ptr<squirrel::Texture, decltype(&freeLoadedTexture)>>
         textures_;
     SDL_Rect viewport_size_;
+
+    bool render_boundary_boxes_{false};
 };
