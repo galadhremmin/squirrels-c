@@ -30,7 +30,7 @@ class PlayerAgent : public Agent {
     void onAgentCollision(Agent& agent, AgentManager& manager) override;
 
   private:
-    static constexpr float kMoveSpeed = 0.12f; // normalized units/s  (≈ 150px/s at 1280p)
+    static constexpr float kMoveSpeed = 0.2f; // normalized units/s  (≈ 150px/s at 1280p)
 
     Physics& physics_;
     Sprite* idle_sprite_;

@@ -25,10 +25,8 @@ void GameStage::update(const Timer& timer) {
         agent->setIsGrounded(false);
 
         resolveViewportBoundary(*agent);
-        for (auto& collision_agent : collision_map_.getAdjacentAgents(*agent)) {
-            if (collision_agent != nullptr && collision_agent != &*agent) {
-                agent->onAgentCollision(*collision_agent, agents_);
-            }
+        for (auto& collision_agent : collision_map_.getCollidingAgents(*agent)) {
+            agent->onAgentCollision(*collision_agent, agents_);
         }
 
         agent->getSprite()->updateAnimationState(agent->getMutableAnimationState(), timer);
