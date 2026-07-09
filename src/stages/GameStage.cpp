@@ -47,6 +47,7 @@ void GameStage::render() const {
     for (const auto& agent : agents_) {
         renderer_.render(*agent);
     }
+    renderer_.renderScore(player_->getNumberOfEggs());
     renderer_.endScene();
 }
 

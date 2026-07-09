@@ -21,13 +21,16 @@ class PlayerAgent : public Agent {
           run_sprite_(run_sprite), run_shadow_sprite_(run_shadow_sprite) {
         setSprite(idle_shadow_sprite);
     };
-
     virtual ~PlayerAgent() = default;
 
     void processInput(const SDL_Event& event);
     void update(const Timer& timer, AgentManager& manager) override;
     void onViewportBoundaryCollision(const ViewportBounds& bounds, ViewportEdge edges) override;
     void onAgentCollision(Agent& agent, AgentManager& manager) override;
+
+    inline size_t getNumberOfEggs() const {
+        return number_of_collected_eggs_;
+    }
 
   private:
     static constexpr float kMoveSpeed = 0.2f; // normalized units/s  (≈ 150px/s at 1280p)
@@ -41,6 +44,8 @@ class PlayerAgent : public Agent {
     bool input_left_ = false;
     bool input_right_ = false;
     bool input_jump_ = false;
+
+    size_t number_of_collected_eggs_{};
 
     AgentStateId prev_anim_state_ = AgentStateId::Idle;
     SpriteAnimationFace prev_face_ = SpriteAnimationFace::Front;

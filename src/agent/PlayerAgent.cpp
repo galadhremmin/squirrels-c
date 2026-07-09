@@ -45,6 +45,7 @@ void PlayerAgent::onAgentCollision(Agent& agent, AgentManager& manager) {
     if (agent.getName() == "egg") {
         manager.removeDeferred(agent);
         std::println("Caught egg {}!", reinterpret_cast<void*>(&agent));
+        number_of_collected_eggs_ += 1;
     }
 }
 

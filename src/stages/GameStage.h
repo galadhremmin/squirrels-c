@@ -30,6 +30,7 @@ static constexpr size_t kCollisionGridRows = 8;
 class GameStage {
   public:
     explicit GameStage(SDL_Renderer* renderer, SDL_Window* window);
+    ~GameStage() = default;
 
     // Not copyable or movable
     GameStage(const GameStage&) = delete;

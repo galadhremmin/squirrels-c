@@ -26,15 +26,8 @@ SANITIZER_CFLAGS = $(DEBUG_CFLAGS) -fsanitize=address -fsanitize=undefined
 SANITIZER_CXXFLAGS = $(DEBUG_CXXFLAGS) -fsanitize=address -fsanitize=undefined
 
 # SDL configuration
-ifeq ($(UNAME_S),Darwin)
-    # macOS
-    SDL_CFLAGS = $(shell pkg-config --cflags sdl3 sdl3-image)
-    SDL_LIBS = $(shell pkg-config --libs sdl3 sdl3-image)
-else
-    # Linux (Fedora)
-    SDL_CFLAGS = $(shell pkg-config --cflags sdl3 sdl3-image)
-    SDL_LIBS = $(shell pkg-config --libs sdl3 sdl3-image)
-endif
+SDL_CFLAGS = $(shell pkg-config --cflags sdl3 sdl3-image sdl3-ttf)
+SDL_LIBS   = $(shell pkg-config --libs   sdl3 sdl3-image sdl3-ttf)
 
 # Target executable
 TARGET = squirrel
@@ -98,8 +91,8 @@ ifeq ($(UNAME_S),Darwin)
 else
 	@echo "Installing dependencies on Fedora Linux..."
 	@echo ""
-	@echo "Install SDL3 and SDL3_image development packages (pkg-config is usually included):"
-	@echo "  sudo dnf install SDL3-devel SDL3_image-devel pkg-config"
+	@echo "Install SDL3 development packages (pkg-config is usually included):"
+	@echo "  sudo dnf install SDL3-devel SDL3_image-devel SDL3_ttf-devel pkg-config"
 endif
 
 # Check if pkg-config is available
@@ -120,6 +113,8 @@ check-deps: check-pkg-config
 	@pkg-config --exists sdl3 && echo "SDL3 found!" || (echo "SDL3 not found! Run 'make install-deps' for instructions." && exit 1)
 	@echo "Checking for SDL3_image..."
 	@pkg-config --exists sdl3-image && echo "SDL3_image found!" || (echo "SDL3_image not found! Run 'make install-deps' for instructions." && exit 1)
+	@echo "Checking for SDL3_ttf..."
+	@pkg-config --exists sdl3-ttf && echo "SDL3_ttf found!" || (echo "SDL3_ttf not found! Run 'make install-deps' for instructions." && exit 1)
 
 # Debug build (with debugging symbols, no optimization)
 debug: CFLAGS = $(DEBUG_CFLAGS)
